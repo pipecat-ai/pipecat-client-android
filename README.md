@@ -1,4 +1,4 @@
-# Real-Time Voice Inference Android Client SDK
+# Pipecat Android Client SDK
 
 [RTVI](https://github.com/rtvi-ai/) is an open standard for Real-Time Voice (and Video) Inference.
 
@@ -6,20 +6,20 @@ This Android library contains the core components and types needed to set up an 
 
 When building an RTVI application, you should use the transport-specific client library (see
 [here](https://rtvi.mintlify.app/api-reference/transports/introduction) for available first-party
-packages.) The base `VoiceClient` has no transport included.
+packages.) The base `PipecatClient` has no transport included.
 
 ## Usage
 
 Add the following dependency to your `build.gradle` file:
 
 ```
-implementation "ai.rtvi:client:0.2.1"
+implementation "ai.pipecat:client:0.3.0"
 ```
 
-Then instantiate the `VoiceClient` from your code, specifying the backend `baseUrl` and transport.
+Then instantiate the `PipecatClient` from your code, specifying the backend `baseUrl` and transport.
 
 ```kotlin
-val callbacks = object : VoiceEventCallbacks() {
+val callbacks = object : RTVIEventCallbacks() {
 
     override fun onBackendError(message: String) {
         Log.e(TAG, "Error from backend: $message")
@@ -28,7 +28,7 @@ val callbacks = object : VoiceEventCallbacks() {
     // ...
 }
 
-val client = VoiceClient(baseUrl, transport, callbacks)
+val client = PipecatClient(transport, callbacks, options)
 
 client.start().withCallback {
     // ...
