@@ -4,4 +4,4 @@ package ai.pipecat.client.helper
 typealias VoiceClientHelper = RTVIClientHelper
 
 @Deprecated("RegisteredVoiceClient renamed to RegisteredRTVIClient")
-typealias RegisteredVoiceClient = RegisteredRTVIClient
+typealias RegisteredVoiceClient = RegisteredPipecatClient
