@@ -37,13 +37,13 @@ jobs:
           java-version: '17'
 
       - name: Build core SDK
-        run: ./gradlew :rtvi-client-android:assembleRelease
+        run: ./gradlew :pipecat-client-android:assembleRelease
 
       - name: Generate Maven repo
-        run: ./gradlew :rtvi-client-android:publishAllPublicationsToRTVILocalRepoRepository
+        run: ./gradlew :pipecat-client-android:publishAllPublicationsToPipecatLocalRepoRepository
 
       - name: Upload Maven repo
         uses: actions/upload-artifact@v4
         with:
-          name: RTVIClientAndroid-Repo
-          path: build/RTVILocalRepo
+          name: PipecatClientAndroid-Repo
+          path: build/PipecatLocalRepo

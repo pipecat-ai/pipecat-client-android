@@ -1,3 +1,8 @@
+# 0.3.0
+
+- Project renamed to `pipecat-client-android`
+- `RTVIClient` renamed to `PipecatClient`
+
 # 0.2.1
 
 - Added callbacks:

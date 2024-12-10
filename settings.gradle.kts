@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RTVI Client"
-include(":rtvi-client-android")
+rootProject.name = "Pipecat Client"
+include(":pipecat-client-android")
