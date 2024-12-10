@@ -1,7 +1,7 @@
 package ai.pipecat.client
 
 import ai.pipecat.client.helper.RTVIClientHelper
-import ai.pipecat.client.helper.RegisteredRTVIClient
+import ai.pipecat.client.helper.RegisteredPipecatClient
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.Promise
 import ai.pipecat.client.result.RTVIError
@@ -101,12 +101,12 @@ open class PipecatClient(
     private val transportCtx = object : TransportContext {
 
         override val options
-            get() = this@RTVIClient.options
+            get() = this@PipecatClient.options
 
         override val callbacks
-            get() = this@RTVIClient.callbacks
+            get() = this@PipecatClient.callbacks
 
-        override val thread = this@RTVIClient.thread
+        override val thread = this@PipecatClient.thread
 
         override fun onMessage(msg: MsgServerToClient) = thread.runOnThread {
 
@@ -117,7 +117,7 @@ open class PipecatClient(
                         val data =
                             JSON_INSTANCE.decodeFromJsonElement<MsgServerToClient.Data.BotReady>(msg.data)
 
-                        this@RTVIClient.transport.setState(TransportState.Ready)
+                        this@PipecatClient.transport.setState(TransportState.Ready)
 
                         connection?.ready?.resolveOk(Unit)
 
@@ -345,7 +345,7 @@ open class PipecatClient(
             throw RTVIException(RTVIError.OtherError("Helper targeting service '$service' already registered"))
         }
 
-        helper.registerVoiceClient(RegisteredRTVIClient(this, service))
+        helper.registerVoiceClient(RegisteredPipecatClient(this, service))
 
         val entry = RegisteredHelper(
             helper = helper,
