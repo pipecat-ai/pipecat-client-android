@@ -59,7 +59,7 @@ open class RTVIClient(
     private var options: RTVIClientOptions,
 ) {
     companion object {
-        private const val TAG = "VoiceClient"
+        private const val TAG = "RTVIClient"
     }
 
     /**
@@ -252,9 +252,6 @@ open class RTVIClient(
      */
     fun initDevices(): Future<Unit, RTVIError> = transport.initDevices()
 
-    @Deprecated("start() renamed to connect()")
-    fun start() = connect()
-
     /**
      * Initiate an RTVI session, connecting to the backend.
      */
@@ -267,42 +264,51 @@ open class RTVIClient(
             )
         }
 
-        transport.setState(TransportState.Authorizing)
+        if (options.params.baseUrl != null && options.params.endpoints.connect != null) {
 
-        // Send POST request to the provided base_url to connect and start the bot
+            transport.setState(TransportState.Authorizing)
 
-        val connectionData = ConnectionData.from(options)
+            // Send POST request to the provided base_url to connect and start the bot
 
-        val body = ConnectionBundle(
-            services = options.services?.associate { it.service to it.value },
-            config = connectionData.config
-        )
-            .serializeWithCustomParams(connectionData.requestData)
-            .toRequestBody("application/json".toMediaType())
+            val connectionData = ConnectionData.from(options)
 
-        val currentConnection = Connection().apply { connection = this }
+            val body = ConnectionBundle(
+                services = options.services?.associate { it.service to it.value },
+                config = connectionData.config
+            )
+                .serializeWithCustomParams(connectionData.requestData)
+                .toRequestBody("application/json".toMediaType())
 
-        return@runOnThreadReturningFuture post(
-            thread = thread,
-            url = options.params.baseUrl + options.params.endpoints.connect,
-            body = body,
-            customHeaders = connectionData.headers
-        )
-            .mapError<RTVIError> {
-                RTVIError.HttpError(it)
-            }
-            .chain { authBundle ->
-                if (currentConnection == connection) {
-                    transport.connect(AuthBundle(authBundle))
-                } else {
-                    resolvedPromiseErr(thread, RTVIError.OperationCancelled)
+            val currentConnection = Connection().apply { connection = this }
+
+            return@runOnThreadReturningFuture post(
+                thread = thread,
+                url = options.params.baseUrl + options.params.endpoints.connect,
+                body = body,
+                customHeaders = connectionData.headers
+            )
+                .mapError<RTVIError> {
+                    RTVIError.HttpError(it)
                 }
-            }
-            .chain { currentConnection.ready }
-            .withTimeout(30000)
-            .withErrorCallback {
-                disconnect()
-            }
+                .chain { authBundle ->
+                    if (currentConnection == connection) {
+                        transport.connect(AuthBundle(authBundle))
+                    } else {
+                        resolvedPromiseErr(thread, RTVIError.OperationCancelled)
+                    }
+                }
+                .chain { currentConnection.ready }
+                .withTimeout(30000)
+                .withErrorCallback {
+                    disconnect()
+                }
+
+        } else {
+            // No connection endpoint
+            Log.w(TAG, "No connect endpoint specified, skipping auth request")
+            connection = Connection()
+            return@runOnThreadReturningFuture transport.connect(null)
+        }
     }
 
     /**
@@ -597,11 +603,10 @@ private class ConnectionData(
 ) {
     companion object {
         fun from(value: RTVIClientOptions) = ConnectionData(
-            headers = value.customHeaders + value.params.headers,
+            headers = value.params.headers,
             requestData = listOf("rtvi_client_version" to Value.Str(RTVI_PROTOCOL_VERSION))
-                    + value.customBodyParams
                     + value.params.requestData,
-            config = value.config + value.params.config
+            config = value.params.config
         )
     }
 }
