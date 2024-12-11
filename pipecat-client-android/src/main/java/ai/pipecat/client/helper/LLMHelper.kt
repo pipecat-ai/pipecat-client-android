@@ -205,7 +205,7 @@ private fun Value.asJsonElement(): JsonElement = when (this) {
     Value.Null -> JsonNull
 }
 
-private fun <V> RegisteredPipecatClient.ensureReady(action: () -> Future<V, RTVIError>): Future<V, RTVIError> =
+private fun <V> RegisteredRTVIClient.ensureReady(action: () -> Future<V, RTVIError>): Future<V, RTVIError> =
     if (client.state == TransportState.Ready) {
         action()
     } else {

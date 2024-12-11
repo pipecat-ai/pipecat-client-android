@@ -1,7 +1,7 @@
 package ai.pipecat.client
 
 import ai.pipecat.client.helper.RTVIClientHelper
-import ai.pipecat.client.helper.RegisteredPipecatClient
+import ai.pipecat.client.helper.RegisteredRTVIClient
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.Promise
 import ai.pipecat.client.result.RTVIError
@@ -53,7 +53,7 @@ private const val RTVI_PROTOCOL_VERSION = "0.3.0"
  * @param options Additional options for configuring the client and backend.
  */
 @Suppress("unused")
-open class PipecatClient(
+open class RTVIClient(
     transport: TransportFactory,
     callbacks: RTVIEventCallbacks,
     private var options: RTVIClientOptions,
@@ -101,12 +101,12 @@ open class PipecatClient(
     private val transportCtx = object : TransportContext {
 
         override val options
-            get() = this@PipecatClient.options
+            get() = this@RTVIClient.options
 
         override val callbacks
-            get() = this@PipecatClient.callbacks
+            get() = this@RTVIClient.callbacks
 
-        override val thread = this@PipecatClient.thread
+        override val thread = this@RTVIClient.thread
 
         override fun onMessage(msg: MsgServerToClient) = thread.runOnThread {
 
@@ -117,7 +117,7 @@ open class PipecatClient(
                         val data =
                             JSON_INSTANCE.decodeFromJsonElement<MsgServerToClient.Data.BotReady>(msg.data)
 
-                        this@PipecatClient.transport.setState(TransportState.Ready)
+                        this@RTVIClient.transport.setState(TransportState.Ready)
 
                         connection?.ready?.resolveOk(Unit)
 
@@ -345,7 +345,7 @@ open class PipecatClient(
             throw RTVIException(RTVIError.OtherError("Helper targeting service '$service' already registered"))
         }
 
-        helper.registerVoiceClient(RegisteredPipecatClient(this, service))
+        helper.registerVoiceClient(RegisteredRTVIClient(this, service))
 
         val entry = RegisteredHelper(
             helper = helper,
