@@ -1,3 +1,7 @@
+<h1><div align="center">
+ <img alt="pipecat" width="500px" height="auto" src="assets/pipecat-android.png">
+</div></h1>
+
 # Pipecat Android Client SDK
 
 [RTVI](https://github.com/rtvi-ai/) is an open standard for Real-Time Voice (and Video) Inference.
