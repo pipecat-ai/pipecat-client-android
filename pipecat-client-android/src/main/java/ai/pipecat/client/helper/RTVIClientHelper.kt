@@ -1,6 +1,6 @@
 package ai.pipecat.client.helper
 
-import ai.pipecat.client.PipecatClient
+import ai.pipecat.client.RTVIClient
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.RTVIError
 import ai.pipecat.client.result.RTVIException
@@ -12,10 +12,10 @@ import java.util.concurrent.atomic.AtomicReference
 
 abstract class RTVIClientHelper {
 
-    private val voiceClient = AtomicReference<RegisteredPipecatClient?>(null)
+    private val voiceClient = AtomicReference<RegisteredRTVIClient?>(null)
 
     protected fun <R> withClient(
-        action: (RegisteredPipecatClient) -> Future<R, RTVIError>
+        action: (RegisteredRTVIClient) -> Future<R, RTVIError>
     ): Future<R, RTVIError> {
 
         val client = voiceClient.get() ?: return resolvedPromiseErr(
@@ -26,7 +26,7 @@ abstract class RTVIClientHelper {
         return client.client.thread.runOnThreadReturningFuture { action(client) }
     }
 
-    protected val client: RegisteredPipecatClient?
+    protected val client: RegisteredRTVIClient?
         get() = voiceClient.get()
 
     /**
@@ -41,7 +41,7 @@ abstract class RTVIClientHelper {
     abstract fun getMessageTypes(): Set<String>
 
     @Throws(RTVIException::class)
-    internal fun registerVoiceClient(client: RegisteredPipecatClient) {
+    internal fun registerVoiceClient(client: RegisteredRTVIClient) {
         if (!this.voiceClient.compareAndSet(null, client)) {
             throw RTVIException(RTVIError.OtherError("Helper is already registered to a client"))
         }
@@ -55,8 +55,8 @@ abstract class RTVIClientHelper {
     }
 }
 
-class RegisteredPipecatClient(
-    val client: PipecatClient,
+class RegisteredRTVIClient(
+    val client: RTVIClient,
     val service: String,
 ) {
     fun action(action: String, args: List<Option> = emptyList()) =
