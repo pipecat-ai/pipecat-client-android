@@ -12,7 +12,7 @@ data class RTVIClientParams(
     /**
      * The base URL for the RTVI POST request.
      */
-    val baseUrl: String,
+    val baseUrl: String?,
 
     /**
      * Custom HTTP headers to be sent with the POST request.

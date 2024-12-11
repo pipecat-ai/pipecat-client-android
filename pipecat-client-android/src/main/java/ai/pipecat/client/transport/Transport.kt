@@ -15,7 +15,7 @@ abstract class Transport {
     abstract fun initDevices(): Future<Unit, RTVIError>
     abstract fun release()
 
-    abstract fun connect(authBundle: AuthBundle): Future<Unit, RTVIError>
+    abstract fun connect(authBundle: AuthBundle?): Future<Unit, RTVIError>
 
     abstract fun disconnect(): Future<Unit, RTVIError>
 

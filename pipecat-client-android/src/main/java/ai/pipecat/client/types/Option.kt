@@ -19,5 +19,6 @@ data class Option(
         name = name,
         value = Value.Object(value)
     )
-
 }
+
+fun List<Option>.getValueFor(option: String) = firstOrNull { it.name == option }?.value
