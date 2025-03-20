@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 data class Transcript(
     val text: String,
     val final: Boolean,
-    val timestamp: String,
+    val timestamp: String? = null,
     @SerialName("user_id")
-    val userId: String
+    val userId: String? = null
 )

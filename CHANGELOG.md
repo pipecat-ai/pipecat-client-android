@@ -1,3 +1,7 @@
+# 0.3.3
+
+- Made `timestamp` and `userId` fields optional in `Transcript`
+
 # 0.3.0
 
 - Project renamed to `pipecat-client-android`
