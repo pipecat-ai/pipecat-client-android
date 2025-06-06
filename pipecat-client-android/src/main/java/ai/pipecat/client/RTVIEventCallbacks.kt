@@ -8,6 +8,7 @@ import ai.pipecat.client.types.ServiceConfig
 import ai.pipecat.client.types.Tracks
 import ai.pipecat.client.types.Transcript
 import ai.pipecat.client.types.TransportState
+import ai.pipecat.client.types.Value
 
 /**
  * Callbacks invoked when changes occur in the RTVI session.
@@ -168,6 +169,11 @@ abstract class RTVIEventCallbacks {
      * Invoked when data is stored by the bot.
      */
     open fun onStorageItemStored(data: MsgServerToClient.Data.StorageItemStoredData) {}
+
+    /**
+     * Invoked when we receive a server message from the bot.
+     */
+    open fun onServerMessage(data: Value) {}
 }
 
 internal class CallbackInterceptor(vararg listeners: RTVIEventCallbacks): RTVIEventCallbacks() {
@@ -268,5 +274,37 @@ internal class CallbackInterceptor(vararg listeners: RTVIEventCallbacks): RTVIEv
 
     override fun onTracksUpdated(tracks: Tracks) {
         callbacks.forEach { it.onTracksUpdated(tracks) }
+    }
+
+    override fun onBotLLMText(data: MsgServerToClient.Data.BotLLMTextData) {
+        callbacks.forEach { it.onBotLLMText(data) }
+    }
+
+    override fun onBotTTSText(data: MsgServerToClient.Data.BotTTSTextData) {
+        callbacks.forEach { it.onBotTTSText(data) }
+    }
+
+    override fun onBotLLMStarted() {
+        callbacks.forEach(RTVIEventCallbacks::onBotLLMStarted)
+    }
+
+    override fun onBotLLMStopped() {
+        callbacks.forEach(RTVIEventCallbacks::onBotLLMStopped)
+    }
+
+    override fun onBotTTSStarted() {
+        callbacks.forEach(RTVIEventCallbacks::onBotTTSStarted)
+    }
+
+    override fun onBotTTSStopped() {
+        callbacks.forEach(RTVIEventCallbacks::onBotTTSStopped)
+    }
+
+    override fun onStorageItemStored(data: MsgServerToClient.Data.StorageItemStoredData) {
+        callbacks.forEach { it.onStorageItemStored(data) }
+    }
+
+    override fun onServerMessage(data: Value) {
+        callbacks.forEach { it.onServerMessage(data) }
     }
 }

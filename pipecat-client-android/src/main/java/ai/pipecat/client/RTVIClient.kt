@@ -213,6 +213,10 @@ open class RTVIClient(
                         callbacks.onStorageItemStored(data)
                     }
 
+                    MsgServerToClient.Type.ServerMessage -> {
+                        callbacks.onServerMessage(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
                     else -> {
 
                         var match = false

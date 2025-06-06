@@ -34,6 +34,7 @@ data class MsgServerToClient(
         const val BotStartedSpeaking = "bot-started-speaking"
         const val BotStoppedSpeaking = "bot-stopped-speaking"
         const val Config = "config"
+        const val ServerMessage = "server-message"
 
         // Service-specific
         const val BotLlmText = "bot-llm-text" // Streaming chunk/word, directly after LLM

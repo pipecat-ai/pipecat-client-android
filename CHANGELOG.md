@@ -1,3 +1,7 @@
+# 0.3.4
+
+- Added `onServerMessage` callback
+
 # 0.3.3
 
 - Made `timestamp` and `userId` fields optional in `Transcript`
