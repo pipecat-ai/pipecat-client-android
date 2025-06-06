@@ -17,7 +17,7 @@ packages.) The base `RTVIClient` has no transport included.
 Add the following dependency to your `build.gradle` file:
 
 ```
-implementation "ai.pipecat:client:0.3.3"
+implementation "ai.pipecat:client:0.3.4"
 ```
 
 Then instantiate the `RTVIClient` from your code, specifying the backend `baseUrl` and transport.
