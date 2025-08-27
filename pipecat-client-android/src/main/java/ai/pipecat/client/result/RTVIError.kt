@@ -5,7 +5,7 @@ import ai.pipecat.client.types.TransportState
 /**
  * An error occurring during an operation.
  */
-abstract class PipecatError {
+abstract class RTVIError {
 
     /**
      * A human-readable description of the error.
@@ -22,28 +22,28 @@ abstract class PipecatError {
     /**
      * Failed to fetch the authentication bundle from the RTVI backend.
      */
-    data class HttpError(val error: ai.pipecat.client.result.HttpError) : PipecatError() {
+    data class HttpError(val error: ai.pipecat.client.result.HttpError) : RTVIError() {
         override val description = error.description
     }
 
     /**
      * An exception was thrown.
      */
-    data class ExceptionThrown(override val exception: Exception) : PipecatError() {
+    data class ExceptionThrown(override val exception: Exception) : RTVIError() {
         override val description = "An exception was thrown ($exception)"
     }
 
     /**
      * An unknown error occurred.
      */
-    data class OtherError(val message: String) : PipecatError() {
+    data class OtherError(val message: String) : RTVIError() {
         override val description = message
     }
 
     /**
      * Operation cannot be performed because the transport is not initialized.
      */
-    data object TransportNotInitialized : PipecatError() {
+    data object TransportNotInitialized : RTVIError() {
         override val description = "Transport not initialized"
     }
 
@@ -53,34 +53,34 @@ abstract class PipecatError {
     data class InvalidState(
         val expected: TransportState,
         val actual: TransportState
-    ) : PipecatError() {
+    ) : RTVIError() {
         override val description = "Invalid state: expected ${expected.name}, actual ${actual.name}"
     }
 
     /**
      * The operation was cancelled before it could complete.
      */
-    data object OperationCancelled : PipecatError() {
+    data object OperationCancelled : RTVIError() {
         override val description = "The operation was cancelled"
     }
 
     data class ErrorResponse(
         val message: String
-    ) : PipecatError() {
+    ) : RTVIError() {
         override val description = "Received error response from backend: $message"
     }
 
     /**
      * The operation timed out before it could complete.
      */
-    data object Timeout : PipecatError() {
+    data object Timeout : RTVIError() {
         override val description = "The operation timed out"
     }
 
     /**
      * The previous connection is still active.
      */
-    data object PreviousConnectionStillActive : PipecatError() {
+    data object PreviousConnectionStillActive : RTVIError() {
         override val description = "The previous connection is still active"
     }
 }

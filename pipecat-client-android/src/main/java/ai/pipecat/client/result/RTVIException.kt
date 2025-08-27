@@ -1,12 +1,12 @@
 package ai.pipecat.client.result
 
 class RTVIException(
-    val error: PipecatError
+    val error: RTVIError
 ) : Exception(error.description, error.exception) {
 
     companion object {
         internal fun <E> from(e: E) = RTVIException(
-            (e as? PipecatError) ?: PipecatError.OtherError(e.toString())
+            (e as? RTVIError) ?: RTVIError.OtherError(e.toString())
         )
     }
 }

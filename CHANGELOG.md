@@ -31,7 +31,6 @@
   - `onBotReady()` now receives a `BotReadyData` parameter
 - Renamed:
   - `RTVIClient` -> `PipecatClient`
-  - `RTVIError` -> `PipecatError`
   - `RTVIEventCallbacks` -> `PipecatEventCallbacks`
   - `RTVIClientOptions` -> `PipecatClientOptions`
   - `onPipecatMetrics()` -> `onMetrics()`

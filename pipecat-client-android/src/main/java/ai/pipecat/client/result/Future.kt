@@ -111,11 +111,11 @@ interface Future<V, E> {
  *
  * @param durationMs Timeout in milliseconds.
  */
-fun <V> Future<V, PipecatError>.withTimeout(durationMs: Long): Future<V, PipecatError> =
+fun <V> Future<V, RTVIError>.withTimeout(durationMs: Long): Future<V, RTVIError> =
     withPromise(thread) { promise ->
 
         val timeoutEvent = Runnable {
-            promise.resolveErr(PipecatError.Timeout)
+            promise.resolveErr(RTVIError.Timeout)
         }
 
         this.withCallback {
