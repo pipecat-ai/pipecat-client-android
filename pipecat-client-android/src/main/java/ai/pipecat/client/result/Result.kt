@@ -34,6 +34,15 @@ sealed interface Result<out V, out E> {
     }
 
     /**
+     * If the result is a success, this method transforms the value to a different type, possibly
+     * returning an error.
+     */
+    fun <V2> mapToResult(filter: (V) -> Result<V2, @UnsafeVariance E>) = when (this) {
+        is Err -> this
+        is Ok -> filter(value)
+    }
+
+    /**
      * If the result is an error, this method transforms the error to a different type.
      */
     fun <E2> mapError(filter: (E) -> E2) = when (this) {
@@ -88,3 +97,10 @@ inline fun <V, E> Result<V, E>.ifError(onError: (E) -> Unit) {
         is Result.Ok -> {}
     }
 }
+
+internal fun <V> catchExceptions(action: () -> V): Result<V, PipecatError> =
+    try {
+        Result.Ok(action())
+    } catch (e: Exception) {
+        Result.Err(PipecatError.ExceptionThrown(e))
+    }

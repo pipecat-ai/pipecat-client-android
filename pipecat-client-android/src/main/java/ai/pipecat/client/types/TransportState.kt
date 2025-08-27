@@ -8,6 +8,7 @@ enum class TransportState {
     Initializing,
     Initialized,
     Authorizing,
+    Authorized,
     Connecting,
     Connected,
     Ready,
