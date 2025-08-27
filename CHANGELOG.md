@@ -1,3 +1,41 @@
+# 1.0.0
+
+- Added:
+  - Methods:
+    - `startBot()`
+    - `startBotAndConnect()`
+    - `appendToContext()`
+    - `sendClientMessage()`
+    - `sendClientRequest()`
+    - `registerFunctionCallHandler()`
+    - `unregisterFunctionCallHandler()`
+    - `unregisterAllFunctionCallHandlers()`
+    - `disconnectBot()`
+  - Callbacks:
+    - `onBotLlmSearchResponse()`
+    - `onLLMFunctionCall()`
+- Removed:
+  - Helper classes (`LLMHelper`, `RTVIClientHelper`) and associated methods (`registerHelper`, `unregisterHelper`)
+  - Server configuration, including `getConfig()`, `updateConfig()`, `describeConfig()` and associated types
+  - Actions, including `action()`, `describeActions()` and associated types
+  - `expiry` field on client and transports
+  - `onStorageItemStored()` callback
+  - `RTVIClientParams`
+  - `sendWithResponse()`
+  - `sendMessage()`
+- Changed:
+  - `connect()` is modified to no longer make a POST request to the backend, but rather pass the
+    specified `Value` straight to the `Transport`. See `startBotAndConnect()` for a helper method
+    which also includes the POST request.
+  - `Transport` now passed directly into `PipecatClientOptions` rather than using factory
+  - `onBotReady()` now receives a `BotReadyData` parameter
+- Renamed:
+  - `RTVIClient` -> `PipecatClient`
+  - `RTVIError` -> `PipecatError`
+  - `RTVIEventCallbacks` -> `PipecatEventCallbacks`
+  - `RTVIClientOptions` -> `PipecatClientOptions`
+  - `onPipecatMetrics()` -> `onMetrics()`
+
 # 0.3.4
 
 - Added `onServerMessage` callback

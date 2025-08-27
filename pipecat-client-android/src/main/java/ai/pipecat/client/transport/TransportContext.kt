@@ -1,7 +1,7 @@
 package ai.pipecat.client.transport
 
-import ai.pipecat.client.RTVIClientOptions
-import ai.pipecat.client.RTVIEventCallbacks
+import ai.pipecat.client.PipecatClientOptions
+import ai.pipecat.client.PipecatEventCallbacks
 import ai.pipecat.client.utils.ThreadRef
 
 /**
@@ -9,9 +9,14 @@ import ai.pipecat.client.utils.ThreadRef
  */
 interface TransportContext {
 
-    val options: RTVIClientOptions
-    val callbacks: RTVIEventCallbacks
+    val options: PipecatClientOptions
+    val callbacks: PipecatEventCallbacks
     val thread: ThreadRef
+
+    /**
+     * Invoked by the transport after the connection has terminated.
+     */
+    fun onConnectionEnd()
 
     /**
      * Invoked by the transport when an RTVI message is received.

@@ -1,18 +1,21 @@
 package ai.pipecat.client.transport
 
-import ai.pipecat.client.types.Option
-import ai.pipecat.client.types.ServiceConfig
+import ai.pipecat.client.types.DataMessage
+import ai.pipecat.client.types.LLMContextMessage
+import ai.pipecat.client.types.LLMFunctionCallResult
 import ai.pipecat.client.utils.JSON_INSTANCE
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.encodeToJsonElement
 import java.util.UUID
 
 /**
  * An RTVI control message sent to the backend.
  */
-@Suppress("DataClassPrivateConstructor")
 @Serializable
+@ConsistentCopyVisibility
 data class MsgClientToServer private constructor(
     val id: String,
     val label: String,
@@ -32,58 +35,80 @@ data class MsgClientToServer private constructor(
     )
 
     object Type {
-        const val DescribeConfig = "describe-config"
-        const val GetConfig = "get-config"
-        const val UpdateConfig = "update-config"
-        const val DescribeActions = "describe-actions"
-        const val Action = "action"
+        const val ClientReady = "client-ready"
+        const val DisconnectBot = "disconnect-bot"
+        const val ClientMessage = "client-message"
+        const val AppendToContext = "append-to-context"
+        const val LlmFunctionCallResult = "llm-function-call-result"
     }
 
     object Data {
+        @Serializable
+        data class ClientReady(
+            val version: String,
+            val about: ClientAbout
+        )
 
         @Serializable
-        data class Action(
-            val service: String,
-            val action: String,
-            val arguments: List<Option>
+        data class ClientAbout(
+            val library: String,
+            @SerialName("library_version")
+            val libraryVersion: String
         )
     }
 
-    @Suppress("FunctionName")
     companion object {
-
-        // Functions not values, as these generate a new ID every time
-        fun DescribeConfig() = MsgClientToServer(
-            type = Type.DescribeConfig,
-            data = null
-        )
-
-        fun GetConfig() = MsgClientToServer(
-            type = Type.GetConfig,
-            data = null
-        )
-
-        fun UpdateConfig(update: List<ServiceConfig>) = MsgClientToServer(
-            type = Type.UpdateConfig,
-            data = JSON_INSTANCE.encodeToJsonElement(update)
-        )
-
-        fun DescribeActions() = MsgClientToServer(
-            type = Type.DescribeActions,
-            data = null
-        )
-
-        fun Action(
-            service: String,
-            action: String,
-            arguments: List<Option>
+        fun ClientReady(
+            rtviVersion: String,
+            library: String,
+            libraryVersion: String
         ) = MsgClientToServer(
-            type = Type.Action,
-            data = JSON_INSTANCE.encodeToJsonElement(Data.Action(
-                service = service,
-                action = action,
-                arguments = arguments
-            ))
+            type = Type.ClientReady,
+            data = JSON_INSTANCE.encodeToJsonElement(
+                Data.ClientReady.serializer(),
+                Data.ClientReady(
+                    version = rtviVersion,
+                    about = Data.ClientAbout(
+                        library = library,
+                        libraryVersion = libraryVersion
+                    )
+                )
+            )
+        )
+
+        fun ClientMessage(
+            msgType: String,
+            data: JsonElement? = null
+        ) = MsgClientToServer(
+            type = Type.ClientMessage,
+            data = JSON_INSTANCE.encodeToJsonElement(
+                DataMessage.serializer(),
+                DataMessage(
+                    msgType = msgType,
+                    data = data ?: JsonNull
+                )
+            )
+        )
+
+        fun AppendToContext(
+            msg: LLMContextMessage
+        ) = MsgClientToServer(
+            type = Type.AppendToContext,
+            data = JSON_INSTANCE.encodeToJsonElement(LLMContextMessage.serializer(), msg)
+        )
+
+        fun DisconnectBot() = MsgClientToServer(
+            type = Type.DisconnectBot,
+            data = null
+        )
+
+        fun LlmFunctionCallResult(
+            msgId: String,
+            data: LLMFunctionCallResult
+        ) = MsgClientToServer(
+            id = msgId,
+            type = Type.LlmFunctionCallResult,
+            data = JSON_INSTANCE.encodeToJsonElement(data)
         )
     }
 }

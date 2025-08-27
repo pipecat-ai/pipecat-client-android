@@ -47,6 +47,16 @@ interface Future<V, E> {
     }
 
     /**
+     * Transform the result to another type.
+     */
+    fun <V2> mapToResult(filter: (V) -> Result<V2, E>): Future<V2, E> =
+        withPromise(thread) { promise ->
+            withCallback { result ->
+                promise.resolve(result.mapToResult(filter))
+            }
+        }
+
+    /**
      * When this Future completes, run another async operation.
      *
      * @return A Future that will resolve when both operations have completed.
@@ -101,11 +111,11 @@ interface Future<V, E> {
  *
  * @param durationMs Timeout in milliseconds.
  */
-fun <V> Future<V, RTVIError>.withTimeout(durationMs: Long): Future<V, RTVIError> =
+fun <V> Future<V, PipecatError>.withTimeout(durationMs: Long): Future<V, PipecatError> =
     withPromise(thread) { promise ->
 
         val timeoutEvent = Runnable {
-            promise.resolveErr(RTVIError.Timeout)
+            promise.resolveErr(PipecatError.Timeout)
         }
 
         this.withCallback {

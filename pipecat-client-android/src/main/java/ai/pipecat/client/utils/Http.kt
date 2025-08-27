@@ -13,17 +13,12 @@ import java.io.InputStreamReader
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
-private val httpClient = OkHttpClient.Builder()
-    .readTimeout(30, TimeUnit.SECONDS)
-    .writeTimeout(30, TimeUnit.SECONDS)
-    .connectTimeout(30, TimeUnit.SECONDS)
-    .build()
-
 internal fun post(
     thread: ThreadRef,
     url: String,
     body: RequestBody,
     customHeaders: List<Pair<String, String>>,
+    timeoutMs: Long,
     responseHandler: ((InputStream) -> Unit)? = null
 ): Future<String, HttpError> {
 
@@ -35,6 +30,12 @@ internal fun post(
                         header(it.first, it.second)
                     }
                 }.build()
+
+                val httpClient = OkHttpClient.Builder()
+                    .readTimeout(timeoutMs, TimeUnit.MILLISECONDS)
+                    .writeTimeout(timeoutMs, TimeUnit.MILLISECONDS)
+                    .connectTimeout(timeoutMs, TimeUnit.MILLISECONDS)
+                    .build()
 
                 httpClient.newCall(request).execute()
 

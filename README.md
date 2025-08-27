@@ -10,20 +10,20 @@ This Android library contains the core components and types needed to set up an 
 
 When building an RTVI application, you should use the transport-specific client library (see
 [here](https://rtvi.mintlify.app/api-reference/transports/introduction) for available first-party
-packages.) The base `RTVIClient` has no transport included.
+packages.) The base `PipecatClient` has no transport included.
 
 ## Usage
 
 Add the following dependency to your `build.gradle` file:
 
 ```
-implementation "ai.pipecat:client:0.3.4"
+implementation "ai.pipecat:client:1.0.0"
 ```
 
-Then instantiate the `RTVIClient` from your code, specifying the backend `baseUrl` and transport.
+Then instantiate the `PipecatClient` from your code:
 
 ```kotlin
-val callbacks = object : RTVIEventCallbacks() {
+val callbacks = object : PipecatEventCallbacks() {
 
     override fun onBackendError(message: String) {
         Log.e(TAG, "Error from backend: $message")
@@ -32,12 +32,12 @@ val callbacks = object : RTVIEventCallbacks() {
     // ...
 }
 
-val client = RTVIClient(transport, callbacks, options)
+val client = PipecatClient(options)
 
-client.start().withCallback {
+client.startBotAndConnect(startBotParams).withCallback {
     // ...
 }
 ```
 
-`client.start()` (and other APIs) return a `Future`, which can give callbacks, or be awaited
-using Kotlin Coroutines (`client.start().await()`).
+Many `PipecatClient` APIs return a `Future`, which can give callbacks, or be awaited
+using Kotlin Coroutines (`client.startBotAndConnect().await()`).
