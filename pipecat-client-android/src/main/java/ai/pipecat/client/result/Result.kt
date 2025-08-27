@@ -98,9 +98,9 @@ inline fun <V, E> Result<V, E>.ifError(onError: (E) -> Unit) {
     }
 }
 
-internal fun <V> catchExceptions(action: () -> V): Result<V, PipecatError> =
+internal fun <V> catchExceptions(action: () -> V): Result<V, RTVIError> =
     try {
         Result.Ok(action())
     } catch (e: Exception) {
-        Result.Err(PipecatError.ExceptionThrown(e))
+        Result.Err(RTVIError.ExceptionThrown(e))
     }

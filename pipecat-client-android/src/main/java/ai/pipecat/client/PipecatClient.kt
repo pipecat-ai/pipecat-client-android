@@ -1,8 +1,8 @@
 package ai.pipecat.client
 
 import ai.pipecat.client.result.Future
-import ai.pipecat.client.result.PipecatError
 import ai.pipecat.client.result.Promise
+import ai.pipecat.client.result.RTVIError
 import ai.pipecat.client.result.catchExceptions
 import ai.pipecat.client.result.resolvedPromiseErr
 import ai.pipecat.client.result.resolvedPromiseOk
@@ -77,7 +77,7 @@ open class PipecatClient(
         override fun onConnectionEnd() {
             thread.runOnThread {
                 responseWaiters.clearAll()
-                connection?.ready?.resolveErr(PipecatError.OperationCancelled)
+                connection?.ready?.resolveErr(RTVIError.OperationCancelled)
                 connection = null
             }
         }
@@ -124,7 +124,7 @@ open class PipecatClient(
                         try {
                             responseWaiters.reject(
                                 id = msg.id!!,
-                                error = PipecatError.ErrorResponse(data.error)
+                                error = RTVIError.ErrorResponse(data.error)
                             )
                         } catch (e: Exception) {
                             Log.e(TAG, "Got exception handling error response", e)
@@ -243,7 +243,7 @@ open class PipecatClient(
     private val transport: Transport = options.transport
 
     private inner class Connection {
-        val ready = Promise<Unit, PipecatError>(thread)
+        val ready = Promise<Unit, RTVIError>(thread)
     }
 
     private var connection: Connection? = null
@@ -257,9 +257,9 @@ open class PipecatClient(
      *
      * @return A Future, representing the asynchronous result of this operation.
      */
-    fun initDevices(): Future<Unit, PipecatError> = transport.initDevices()
+    fun initDevices(): Future<Unit, RTVIError> = transport.initDevices()
 
-    fun startBot(startBotParams: APIRequest): Future<Value, PipecatError> =
+    fun startBot(startBotParams: APIRequest): Future<Value, RTVIError> =
         thread.runOnThreadReturningFuture {
 
             when (transport.state()) {
@@ -268,7 +268,7 @@ open class PipecatClient(
                 TransportState.Connected,
                 TransportState.Ready -> return@runOnThreadReturningFuture resolvedPromiseErr(
                     thread,
-                    PipecatError.InvalidState(
+                    RTVIError.InvalidState(
                         expected = TransportState.Initialized,
                         actual = transport.state()
                     )
@@ -290,11 +290,11 @@ open class PipecatClient(
                 timeoutMs = startBotParams.timeoutMs
             )
 
-            postResult.mapError<PipecatError> { PipecatError.HttpError(it) }.chain<Value> {
+            postResult.mapError<RTVIError> { RTVIError.HttpError(it) }.chain<Value> {
                 try {
                     resolvedPromiseOk(thread, JSON_INSTANCE.decodeFromString(it))
                 } catch (e: Exception) {
-                    resolvedPromiseErr(thread, PipecatError.ExceptionThrown(e))
+                    resolvedPromiseErr(thread, RTVIError.ExceptionThrown(e))
                 }
             }.withCallback {
                 transport.setState(
@@ -310,13 +310,13 @@ open class PipecatClient(
     /**
      * Initiate an RTVI session, connecting to the backend.
      */
-    fun connect(transportParams: Value): Future<Unit, PipecatError> =
+    fun connect(transportParams: Value): Future<Unit, RTVIError> =
         thread.runOnThreadReturningFuture {
 
             if (connection != null) {
                 return@runOnThreadReturningFuture resolvedPromiseErr(
                     thread,
-                    PipecatError.PreviousConnectionStillActive
+                    RTVIError.PreviousConnectionStillActive
                 )
             }
 
@@ -331,7 +331,7 @@ open class PipecatClient(
      * This convenience method combines `startBot()` and `connect()` into a single call,
      * handling the complete flow from authentication to established connection.
      */
-    fun startBotAndConnect(startBotParams: APIRequest): Future<Unit, PipecatError> =
+    fun startBotAndConnect(startBotParams: APIRequest): Future<Unit, RTVIError> =
         startBot(startBotParams).chain { connect(it) }
 
     /**
@@ -339,7 +339,7 @@ open class PipecatClient(
      *
      * @return A Future, representing the asynchronous result of this operation.
      */
-    fun disconnect(): Future<Unit, PipecatError> {
+    fun disconnect(): Future<Unit, RTVIError> {
         return transport.disconnect()
     }
 
@@ -353,7 +353,7 @@ open class PipecatClient(
      *
      * Use this method to send fire-and-forget messages or notifications to the bot.
      */
-    fun sendClientMessage(msgType: String, data: Value = Value.Null): Future<Unit, PipecatError> =
+    fun sendClientMessage(msgType: String, data: Value = Value.Null): Future<Unit, RTVIError> =
         sendMessage(
             MsgClientToServer.ClientMessage(
                 msgType = msgType,
@@ -369,7 +369,7 @@ open class PipecatClient(
     fun sendClientRequest(
         msgType: String,
         data: Value = Value.Null
-    ): Future<DataMessage, PipecatError> = thread.runOnThreadReturningFuture {
+    ): Future<DataMessage, RTVIError> = thread.runOnThreadReturningFuture {
 
         val idUuid = UUID.randomUUID()
         val id = idUuid.toString()
@@ -394,7 +394,7 @@ open class PipecatClient(
      */
     fun appendToContext(
         message: LLMContextMessage
-    ): Future<AppendToContextResultData, PipecatError> = thread.runOnThreadReturningFuture {
+    ): Future<AppendToContextResultData, RTVIError> = thread.runOnThreadReturningFuture {
         val idUuid = UUID.randomUUID()
         val id = idUuid.toString()
 
