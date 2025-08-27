@@ -2,6 +2,7 @@ package ai.pipecat.client.transport
 
 import ai.pipecat.client.PipecatClientOptions
 import ai.pipecat.client.PipecatEventCallbacks
+import ai.pipecat.client.RTVI_PROTOCOL_VERSION
 import ai.pipecat.client.utils.ThreadRef
 
 /**
@@ -12,6 +13,9 @@ interface TransportContext {
     val options: PipecatClientOptions
     val callbacks: PipecatEventCallbacks
     val thread: ThreadRef
+
+    val protocolVersion: String
+        get() = RTVI_PROTOCOL_VERSION
 
     /**
      * Invoked by the transport after the connection has terminated.
