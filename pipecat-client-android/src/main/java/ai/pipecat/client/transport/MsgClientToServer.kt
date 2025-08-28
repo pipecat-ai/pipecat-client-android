@@ -53,7 +53,10 @@ data class MsgClientToServer private constructor(
         data class ClientAbout(
             val library: String,
             @SerialName("library_version")
-            val libraryVersion: String
+            val libraryVersion: String,
+            val platform: String,
+            @SerialName("platform_version")
+            val platformVersion: String
         )
     }
 
@@ -61,7 +64,9 @@ data class MsgClientToServer private constructor(
         fun ClientReady(
             rtviVersion: String,
             library: String,
-            libraryVersion: String
+            libraryVersion: String,
+            platform: String,
+            platformVersion: String
         ) = MsgClientToServer(
             type = Type.ClientReady,
             data = JSON_INSTANCE.encodeToJsonElement(
@@ -70,7 +75,9 @@ data class MsgClientToServer private constructor(
                     version = rtviVersion,
                     about = Data.ClientAbout(
                         library = library,
-                        libraryVersion = libraryVersion
+                        libraryVersion = libraryVersion,
+                        platform = platform,
+                        platformVersion = platformVersion
                     )
                 )
             )
