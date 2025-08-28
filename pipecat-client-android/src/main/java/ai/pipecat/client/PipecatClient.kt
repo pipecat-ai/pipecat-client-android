@@ -316,7 +316,6 @@ open class PipecatClient(
                 )
             }
 
-            Log.w(TAG, "No connect endpoint specified, skipping auth request")
             connection = Connection()
             return@runOnThreadReturningFuture transport.connect(transportParams)
         }
