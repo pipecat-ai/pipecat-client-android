@@ -175,13 +175,10 @@ abstract class PipecatEventCallbacks {
     open fun onBotLLMSearchResponse(data: BotLLMSearchResponseData) {}
 
     /**
-     * Invoked when the bot makes a function call request to the client. The client must
-     * respond by invoking `onResult`.
+     * Invoked when the bot makes a function call request to the client.
+     *
+     * To respond to function calls, register a handler using
+     * registerFunctionCallHandler().
      */
-    open fun onLLMFunctionCall(
-        functionCallData: LLMFunctionCallData,
-        onResult: (Value) -> Unit
-    ) {
-        onResult(Value.Null)
-    }
+    open fun onLLMFunctionCall(functionCallData: LLMFunctionCallData) {}
 }

@@ -192,35 +192,33 @@ open class PipecatClient(
                         val functionCallData =
                             JSON_INSTANCE.decodeFromJsonElement<LLMFunctionCallData>(msg.data)
 
+                        callbacks.onLLMFunctionCall(functionCallData)
+
                         val handler = functionCallHandlers[functionCallData.functionName]
 
-                        val activeConnection = connection
+                        if (handler != null) {
+                            val activeConnection = connection
 
-                        val resultHandler: (Value) -> Unit = { resultData ->
+                            handler.handleFunctionCall(functionCallData) { resultData ->
 
-                            thread.runOnThread {
-                                if (activeConnection == connection) {
-                                    sendMessage(
-                                        MsgClientToServer.LlmFunctionCallResult(
-                                            msgId = msg.id ?: UUID.randomUUID().toString(),
-                                            data = LLMFunctionCallResult(
-                                                functionName = functionCallData.functionName,
-                                                toolCallID = functionCallData.toolCallID,
-                                                arguments = functionCallData.args,
-                                                result = JSON_INSTANCE.encodeToJsonElement(
-                                                    resultData
+                                thread.runOnThread {
+                                    if (activeConnection == connection) {
+                                        sendMessage(
+                                            MsgClientToServer.LlmFunctionCallResult(
+                                                msgId = msg.id ?: UUID.randomUUID().toString(),
+                                                data = LLMFunctionCallResult(
+                                                    functionName = functionCallData.functionName,
+                                                    toolCallID = functionCallData.toolCallID,
+                                                    arguments = functionCallData.args,
+                                                    result = JSON_INSTANCE.encodeToJsonElement<Value>(
+                                                        resultData
+                                                    )
                                                 )
                                             )
                                         )
-                                    )
+                                    }
                                 }
                             }
-                        }
-
-                        if (handler == null) {
-                            callbacks.onLLMFunctionCall(functionCallData, resultHandler)
-                        } else {
-                            handler.handleFunctionCall(functionCallData, resultHandler)
                         }
                     }
 
