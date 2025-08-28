@@ -119,12 +119,6 @@ abstract class PipecatEventCallbacks {
     open fun onBotTranscript(text: String) {}
 
     /**
-     * Invoked when a message from the backend is received which was not handled
-     * by the PipecatClient.
-     */
-    open fun onGenericMessage(msg: MsgServerToClient) {}
-
-    /**
      * Invoked when the state of the input devices changes.
      */
     open fun onInputsUpdated(camera: Boolean, mic: Boolean) {}

@@ -228,8 +228,6 @@ open class PipecatClient(
 
                     else -> {
                         Log.w(TAG, "Unexpected message type '${msg.type}'")
-
-                        callbacks.onGenericMessage(msg)
                     }
                 }
             } catch (e: Exception) {
