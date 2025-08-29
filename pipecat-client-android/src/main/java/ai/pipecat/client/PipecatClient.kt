@@ -49,7 +49,7 @@ internal const val RTVI_PROTOCOL_VERSION = "1.0.0"
  * @param options Additional options for configuring the client and backend.
  */
 @Suppress("unused")
-open class PipecatClient<TransportType: Transport<ConnectParams>, ConnectParams>(
+open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams>(
     private val transport: TransportType,
     private val options: PipecatClientOptions,
 ) {
@@ -350,6 +350,7 @@ open class PipecatClient<TransportType: Transport<ConnectParams>, ConnectParams>
     fun sendClientMessage(msgType: String, data: Value = Value.Null): Future<Unit, RTVIError> =
         sendMessage(
             MsgClientToServer.ClientMessage(
+                id = UUID.randomUUID().toString(),
                 msgType = msgType,
                 data = JSON_INSTANCE.encodeToJsonElement(data)
             )
@@ -370,7 +371,13 @@ open class PipecatClient<TransportType: Transport<ConnectParams>, ConnectParams>
 
         val future = responseWaiters.waitFor(id)
 
-        sendClientMessage(msgType, data)
+        sendMessage(
+            MsgClientToServer.ClientMessage(
+                id = id,
+                msgType = msgType,
+                data = JSON_INSTANCE.encodeToJsonElement<Value>(data)
+            )
+        )
             .withErrorCallback { responseWaiters.reject(id, it) }
             .chain { future }
             .mapToResult { catchExceptions { JSON_INSTANCE.decodeFromJsonElement(it) } }
