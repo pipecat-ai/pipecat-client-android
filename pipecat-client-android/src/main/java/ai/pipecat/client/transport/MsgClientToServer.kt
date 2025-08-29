@@ -84,9 +84,11 @@ data class MsgClientToServer private constructor(
         )
 
         fun ClientMessage(
+            id: String,
             msgType: String,
             data: JsonElement? = null
         ) = MsgClientToServer(
+            id = id,
             type = Type.ClientMessage,
             data = JSON_INSTANCE.encodeToJsonElement(
                 DataMessage.serializer(),
