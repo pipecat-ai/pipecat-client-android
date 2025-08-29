@@ -49,7 +49,8 @@ internal const val RTVI_PROTOCOL_VERSION = "1.0.0"
  * @param options Additional options for configuring the client and backend.
  */
 @Suppress("unused")
-open class PipecatClient(
+open class PipecatClient<TransportType: Transport<ConnectParams>, ConnectParams>(
+    private val transport: TransportType,
     private val options: PipecatClientOptions,
 ) {
     companion object {
@@ -236,8 +237,6 @@ open class PipecatClient(
         }
     }
 
-    private val transport: Transport = options.transport
-
     private inner class Connection {
         val ready = Promise<Unit, RTVIError>(thread)
     }
@@ -255,7 +254,7 @@ open class PipecatClient(
      */
     fun initDevices(): Future<Unit, RTVIError> = transport.initDevices()
 
-    fun startBot(startBotParams: APIRequest): Future<Value, RTVIError> =
+    fun startBot(startBotParams: APIRequest): Future<ConnectParams, RTVIError> =
         thread.runOnThreadReturningFuture {
 
             when (transport.state()) {
@@ -286,9 +285,9 @@ open class PipecatClient(
                 timeoutMs = startBotParams.timeoutMs
             )
 
-            postResult.mapError<RTVIError> { RTVIError.HttpError(it) }.chain<Value> {
+            postResult.mapError<RTVIError> { RTVIError.HttpError(it) }.chain {
                 try {
-                    resolvedPromiseOk(thread, JSON_INSTANCE.decodeFromString(it))
+                    resolvedPromiseOk(thread, transport.deserializeConnectParams(it))
                 } catch (e: Exception) {
                     resolvedPromiseErr(thread, RTVIError.ExceptionThrown(e))
                 }
@@ -306,7 +305,7 @@ open class PipecatClient(
     /**
      * Initiate an RTVI session, connecting to the backend.
      */
-    fun connect(transportParams: Value): Future<Unit, RTVIError> =
+    fun connect(transportParams: ConnectParams): Future<Unit, RTVIError> =
         thread.runOnThreadReturningFuture {
 
             if (connection != null) {

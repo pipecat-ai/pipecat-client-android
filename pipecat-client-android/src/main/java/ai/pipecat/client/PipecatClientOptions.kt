@@ -1,16 +1,9 @@
 package ai.pipecat.client
 
-import ai.pipecat.client.transport.Transport
-
 /**
  * Configuration options when instantiating a [PipecatClient].
  */
 data class PipecatClientOptions(
-
-    /**
-     * Transport class for media streaming.
-     */
-    val transport: Transport,
 
     /**
      * Event callbacks.
