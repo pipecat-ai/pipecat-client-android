@@ -6,19 +6,20 @@ import ai.pipecat.client.types.MediaDeviceId
 import ai.pipecat.client.types.MediaDeviceInfo
 import ai.pipecat.client.types.Tracks
 import ai.pipecat.client.types.TransportState
-import ai.pipecat.client.types.Value
 
 /**
  * An RTVI transport.
  */
-abstract class Transport {
+abstract class Transport<ConnectParams> {
 
     abstract fun initialize(ctx: TransportContext)
+
+    abstract fun deserializeConnectParams(json: String): ConnectParams
 
     abstract fun initDevices(): Future<Unit, RTVIError>
     abstract fun release()
 
-    abstract fun connect(transportParams: Value): Future<Unit, RTVIError>
+    abstract fun connect(transportParams: ConnectParams): Future<Unit, RTVIError>
 
     abstract fun disconnect(): Future<Unit, RTVIError>
 
