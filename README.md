@@ -32,7 +32,7 @@ val callbacks = object : PipecatEventCallbacks() {
     // ...
 }
 
-val client = PipecatClient(options)
+val client = PipecatClient(transport, options)
 
 client.startBotAndConnect(startBotParams).withCallback {
     // ...
