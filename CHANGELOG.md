@@ -1,3 +1,7 @@
+# 1.0.1
+
+- Changed content type `startBot()` POST request for compatibility reasons 
+
 # 1.0.0
 
 - Added:

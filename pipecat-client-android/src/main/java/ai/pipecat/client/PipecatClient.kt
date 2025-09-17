@@ -280,6 +280,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                 thread = thread,
                 url = startBotParams.endpoint,
                 body = JSON_INSTANCE.encodeToString(startBotParams.requestData)
+                    .toByteArray() // Needed to avoid adding charset (which PCC doesn't support)
                     .toRequestBody("application/json".toMediaType()),
                 customHeaders = startBotParams.headers.toList(),
                 timeoutMs = startBotParams.timeoutMs
