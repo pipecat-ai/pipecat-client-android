@@ -1,3 +1,12 @@
+# 1.0.2
+
+- Added new `sendText()` method to support the new RTVI `send-text` event. The method
+  takes a string, along with an optional set of options to control whether the bot
+  should respond immediately and/or whether the bot should respond with audio (vs. text only).
+  Note: This is a replacement for the current `appendToContext()` method.
+
+- `appendToContext()` has been deprecated in favor of the new `sendText()` method. 
+
 # 1.0.1
 
 - Changed content type `startBot()` POST request for compatibility reasons 

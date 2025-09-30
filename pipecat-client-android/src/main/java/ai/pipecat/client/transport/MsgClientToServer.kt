@@ -3,6 +3,7 @@ package ai.pipecat.client.transport
 import ai.pipecat.client.types.DataMessage
 import ai.pipecat.client.types.LLMContextMessage
 import ai.pipecat.client.types.LLMFunctionCallResult
+import ai.pipecat.client.types.SendTextOptions
 import ai.pipecat.client.utils.JSON_INSTANCE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -39,6 +40,7 @@ data class MsgClientToServer private constructor(
         const val DisconnectBot = "disconnect-bot"
         const val ClientMessage = "client-message"
         const val AppendToContext = "append-to-context"
+        const val SendText = "send-text"
         const val LlmFunctionCallResult = "llm-function-call-result"
     }
 
@@ -57,6 +59,12 @@ data class MsgClientToServer private constructor(
             val platform: String,
             @SerialName("platform_version")
             val platformVersion: String
+        )
+
+        @Serializable
+        data class SendText(
+            val content: String,
+            val options: SendTextOptions
         )
     }
 
@@ -104,6 +112,17 @@ data class MsgClientToServer private constructor(
         ) = MsgClientToServer(
             type = Type.AppendToContext,
             data = JSON_INSTANCE.encodeToJsonElement(LLMContextMessage.serializer(), msg)
+        )
+
+        fun SendText(
+            content: String,
+            options: SendTextOptions
+        ) = MsgClientToServer(
+            type = Type.SendText,
+            data = JSON_INSTANCE.encodeToJsonElement(Data.SendText.serializer(), Data.SendText(
+                content = content,
+                options = options
+            ))
         )
 
         fun DisconnectBot() = MsgClientToServer(
