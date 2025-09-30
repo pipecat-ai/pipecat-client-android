@@ -19,6 +19,7 @@ import ai.pipecat.client.types.LLMFunctionCallData
 import ai.pipecat.client.types.LLMFunctionCallHandler
 import ai.pipecat.client.types.LLMFunctionCallResult
 import ai.pipecat.client.types.MediaDeviceId
+import ai.pipecat.client.types.SendTextOptions
 import ai.pipecat.client.types.Transcript
 import ai.pipecat.client.types.TransportState
 import ai.pipecat.client.types.Value
@@ -393,7 +394,10 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
      *
      * The context message becomes part of the LLM's memory for the current session and will be
      * considered when generating future responses.
+     *
+     * Note: this method is deprecated. Use sendText() instead.
      */
+    @Deprecated("appendToContext() is deprecated. Use sendText() instead.")
     fun appendToContext(
         message: LLMContextMessage
     ): Future<AppendToContextResultData, RTVIError> = thread.runOnThreadReturningFuture {
@@ -406,6 +410,21 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
             .withErrorCallback { responseWaiters.reject(id, it) }
             .chain { future }
             .mapToResult { catchExceptions { JSON_INSTANCE.decodeFromJsonElement(it) } }
+    }
+
+    /**
+     * Appends the specified message to the active conversation with the bot.
+     *
+     * The bot's response may be controlled using the values in `SendTextOptions`.
+     */
+    fun sendText(
+        content: String,
+        options: SendTextOptions = SendTextOptions()
+    ): Future<Unit, RTVIError> {
+        return sendMessage(MsgClientToServer.SendText(
+            content = content,
+            options = options
+        ))
     }
 
     /**
