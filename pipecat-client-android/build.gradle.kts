@@ -60,7 +60,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "ai.pipecat"
             artifactId = "client"
-            version = "1.0.2"
+            version = "1.1.0"
 
             pom {
                 name.set("Pipecat Client")
