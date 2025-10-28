@@ -1,3 +1,7 @@
+# 1.1.0
+
+- Update signature of `Transport.deserializeConnectParams()` to also take the startBot `APIRequest`.
+
 # 1.0.2
 
 - Added new `sendText()` method to support the new RTVI `send-text` event. The method

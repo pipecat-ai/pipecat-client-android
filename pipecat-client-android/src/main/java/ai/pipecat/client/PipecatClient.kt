@@ -77,11 +77,10 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
         override val thread = this@PipecatClient.thread
 
         override fun onConnectionEnd() {
-            thread.runOnThread {
-                responseWaiters.clearAll()
-                connection?.ready?.resolveErr(RTVIError.OperationCancelled)
-                connection = null
-            }
+            thread.assertCurrent()
+            responseWaiters.clearAll()
+            connection?.ready?.resolveErr(RTVIError.OperationCancelled)
+            connection = null
         }
 
         override fun onMessage(msg: MsgServerToClient) = thread.runOnThread {
@@ -289,7 +288,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
             postResult.mapError<RTVIError> { RTVIError.HttpError(it) }.chain {
                 try {
-                    resolvedPromiseOk(thread, transport.deserializeConnectParams(it))
+                    resolvedPromiseOk(thread, transport.deserializeConnectParams(it, startBotParams))
                 } catch (e: Exception) {
                     resolvedPromiseErr(thread, RTVIError.ExceptionThrown(e))
                 }

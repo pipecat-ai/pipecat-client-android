@@ -2,6 +2,7 @@ package ai.pipecat.client.transport
 
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.RTVIError
+import ai.pipecat.client.types.APIRequest
 import ai.pipecat.client.types.MediaDeviceId
 import ai.pipecat.client.types.MediaDeviceInfo
 import ai.pipecat.client.types.Tracks
@@ -14,7 +15,10 @@ abstract class Transport<ConnectParams> {
 
     abstract fun initialize(ctx: TransportContext)
 
-    abstract fun deserializeConnectParams(json: String): ConnectParams
+    abstract fun deserializeConnectParams(
+        json: String,
+        startBotRequest: APIRequest
+    ): ConnectParams
 
     abstract fun initDevices(): Future<Unit, RTVIError>
     abstract fun release()
