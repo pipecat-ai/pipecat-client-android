@@ -167,6 +167,13 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                         callbacks.onBotLLMText(data)
                     }
 
+                    MsgServerToClient.Type.BotOutput -> {
+                        val data: MsgServerToClient.Data.BotOutputData =
+                            JSON_INSTANCE.decodeFromJsonElement(msg.data)
+
+                        callbacks.onBotOutput(data)
+                    }
+
                     MsgServerToClient.Type.BotTtsText -> {
                         val data: MsgServerToClient.Data.BotTTSTextData =
                             JSON_INSTANCE.decodeFromJsonElement(msg.data)

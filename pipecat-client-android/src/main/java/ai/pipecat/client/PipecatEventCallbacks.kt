@@ -134,6 +134,11 @@ abstract class PipecatEventCallbacks {
     open fun onBotLLMText(data: MsgServerToClient.Data.BotLLMTextData) {}
 
     /**
+     * Invoked when the bot emits output.
+     */
+    open fun onBotOutput(data: MsgServerToClient.Data.BotOutputData) {}
+
+    /**
      * Invoked when text is spoken by the bot.
      */
     open fun onBotTTSText(data: MsgServerToClient.Data.BotTTSTextData) {}
