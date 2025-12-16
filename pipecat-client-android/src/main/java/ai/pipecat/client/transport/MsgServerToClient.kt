@@ -1,5 +1,6 @@
 package ai.pipecat.client.transport
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -34,6 +35,7 @@ data class MsgServerToClient(
         const val BotLlmText = "bot-llm-text" // Streaming chunk/word, directly after LLM
         const val BotLlmStarted = "bot-llm-started"
         const val BotLlmStopped = "bot-llm-stopped"
+        const val BotOutput = "bot-output"
         const val BotTtsText = "bot-tts-text"
         const val BotTtsStarted = "bot-tts-started"
         const val BotTtsStopped = "bot-tts-stopped"
@@ -54,6 +56,20 @@ data class MsgServerToClient(
         @Serializable
         data class BotTTSTextData(
             val text: String
+        )
+
+        /**
+         * Streaming bot output tokens/chunks.
+         *
+         * Example:
+         * {"text":"your","spoken":true,"aggregated_by":"word"}
+         */
+        @Serializable
+        data class BotOutputData(
+            val text: String,
+            val spoken: Boolean,
+            @SerialName("aggregated_by")
+            val aggregatedBy: String? = null
         )
     }
 }
