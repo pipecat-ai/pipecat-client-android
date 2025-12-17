@@ -12,6 +12,7 @@ import ai.pipecat.client.transport.Transport
 import ai.pipecat.client.transport.TransportContext
 import ai.pipecat.client.types.APIRequest
 import ai.pipecat.client.types.AppendToContextResultData
+import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.DataMessage
 import ai.pipecat.client.types.LLMContextMessage
@@ -168,7 +169,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     }
 
                     MsgServerToClient.Type.BotOutput -> {
-                        val data: MsgServerToClient.Data.BotOutputData =
+                        val data: BotOutputData =
                             JSON_INSTANCE.decodeFromJsonElement(msg.data)
 
                         callbacks.onBotOutput(data)
