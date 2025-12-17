@@ -2,6 +2,7 @@ package ai.pipecat.client
 
 import ai.pipecat.client.transport.MsgServerToClient
 import ai.pipecat.client.types.BotLLMSearchResponseData
+import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.LLMFunctionCallData
 import ai.pipecat.client.types.MediaDeviceInfo
@@ -116,6 +117,7 @@ abstract class PipecatEventCallbacks {
     /**
      * Invoked when bot transcript data is available.
      */
+    @Deprecated("onBotTranscript callback deprecated, please use onBotOutput instead")
     open fun onBotTranscript(text: String) {}
 
     /**
@@ -136,7 +138,7 @@ abstract class PipecatEventCallbacks {
     /**
      * Invoked when the bot emits output.
      */
-    open fun onBotOutput(data: MsgServerToClient.Data.BotOutputData) {}
+    open fun onBotOutput(data: BotOutputData) {}
 
     /**
      * Invoked when text is spoken by the bot.

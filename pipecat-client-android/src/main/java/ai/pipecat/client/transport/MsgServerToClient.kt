@@ -1,6 +1,5 @@
 package ai.pipecat.client.transport
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -58,18 +57,5 @@ data class MsgServerToClient(
             val text: String
         )
 
-        /**
-         * Streaming bot output tokens/chunks.
-         *
-         * Example:
-         * {"text":"your","spoken":true,"aggregated_by":"word"}
-         */
-        @Serializable
-        data class BotOutputData(
-            val text: String,
-            val spoken: Boolean,
-            @SerialName("aggregated_by")
-            val aggregatedBy: String? = null
-        )
     }
 }
