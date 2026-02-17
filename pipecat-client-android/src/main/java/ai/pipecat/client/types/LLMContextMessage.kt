@@ -15,6 +15,8 @@ data class LLMContextMessage(
         @SerialName("user")
         User("user"),
         @SerialName("assistant")
-        Assistant("assistant")
+        Assistant("assistant"),
+        @SerialName("system")
+        System("system"),
     }
 }
