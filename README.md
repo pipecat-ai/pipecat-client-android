@@ -4,7 +4,7 @@
 
 # Pipecat Android Client SDK
 
-[RTVI](https://github.com/rtvi-ai/) is an open standard for Real-Time Voice (and Video) Inference.
+[RTVI](https://docs.pipecat.ai/client/rtvi-standard) is an open standard for Real-Time Voice (and Video) Inference.
 
 This Android library contains the core components and types needed to set up an RTVI session.
 
