@@ -1,3 +1,9 @@
+# Unreleased
+
+- Added support for RTVI protocol 2.0.0. `BotOutputData` now includes new fields: `willBeSpoken`, `spokenStatus`, `spokenProgress`, and `segmentId`, enabling word-level TTS progress tracking. The `spoken` field is deprecated in favour of `willBeSpoken`.
+- Added `RTVI_PROTOCOL_VERSION` constant (`"2.0.0"`).
+- The client now logs a warning when the bot is running an older RTVI protocol version than the client.
+
 # 1.1.0
 
 - Update signature of `Transport.deserializeConnectParams()` to also take the startBot `APIRequest`.
