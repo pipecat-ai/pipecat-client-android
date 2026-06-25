@@ -38,7 +38,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 
-internal const val RTVI_PROTOCOL_VERSION = "1.0.0"
+internal const val RTVI_PROTOCOL_VERSION = "2.0.0"
 
 /**
  * A Pipecat client. Connects to an RTVI backend and handles bidirectional audio and video
@@ -96,6 +96,12 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                         this@PipecatClient.transport.setState(TransportState.Ready)
 
                         connection?.ready?.resolveOk(Unit)
+
+                        val botMajor = data.version.split(".").firstOrNull()?.toIntOrNull() ?: 0
+                        val clientMajor = RTVI_PROTOCOL_VERSION.split(".").firstOrNull()?.toIntOrNull() ?: 0
+                        if (botMajor < clientMajor) {
+                            Log.w(TAG, "Bot is running an older RTVI protocol version (${data.version}) than the client ($RTVI_PROTOCOL_VERSION). Some features may not be available.")
+                        }
 
                         callbacks.onBotReady(data)
                     }
