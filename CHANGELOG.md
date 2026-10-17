@@ -2,6 +2,7 @@
 
 - Added support for RTVI protocol 2.0.0. `BotOutputData` now includes new fields: `willBeSpoken`, `spokenStatus`, `spokenProgress`, and `segmentId`, enabling word-level TTS progress tracking. The `spoken` field is deprecated in favour of `willBeSpoken`.
 - The client now logs a warning when the bot is running an older RTVI protocol version than the client.
+- Fixed `disconnect()` during `startBot()`: `startBot()` and `startBotAndConnect()` now resolve immediately with `OperationCancelled`, and the client no longer connects once the start request completes. `release()` cancels a pending `startBot()` as well. `disconnect()` also succeeds in the `Authorized` state, before `connect()` is called.
 
 # 1.1.0
 

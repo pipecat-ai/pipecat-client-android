@@ -3,6 +3,7 @@ package ai.pipecat.client
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.Promise
 import ai.pipecat.client.result.RTVIError
+import ai.pipecat.client.result.Result
 import ai.pipecat.client.result.catchExceptions
 import ai.pipecat.client.result.resolvedPromiseErr
 import ai.pipecat.client.result.resolvedPromiseOk
@@ -257,6 +258,8 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
     private var connection: Connection? = null
 
+    private var pendingStartBot: Promise<ConnectParams, RTVIError>? = null
+
     init {
         transport.initialize(transportCtx)
     }
@@ -290,7 +293,10 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
             transport.setState(TransportState.Authorizing)
 
-            val postResult = post(
+            val startBotResult = Promise<ConnectParams, RTVIError>(thread)
+            pendingStartBot = startBotResult
+
+            post(
                 thread = thread,
                 url = startBotParams.endpoint,
                 body = JSON_INSTANCE.encodeToString(startBotParams.requestData)
@@ -298,23 +304,36 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     .toRequestBody("application/json".toMediaType()),
                 customHeaders = startBotParams.headers.toList(),
                 timeoutMs = startBotParams.timeoutMs
-            )
+            ).withCallback { postResult ->
 
-            postResult.mapError<RTVIError> { RTVIError.HttpError(it) }.chain {
-                try {
-                    resolvedPromiseOk(thread, transport.deserializeConnectParams(it, startBotParams))
-                } catch (e: Exception) {
-                    resolvedPromiseErr(thread, RTVIError.ExceptionThrown(e))
+                // disconnect() or release() may have cancelled this request while it was in flight
+                if (pendingStartBot !== startBotResult) {
+                    return@withCallback
                 }
-            }.withCallback {
+
+                pendingStartBot = null
+
+                val result = postResult.mapError<RTVIError> { RTVIError.HttpError(it) }
+                    .mapToResult {
+                        try {
+                            Result.Ok(transport.deserializeConnectParams(it, startBotParams))
+                        } catch (e: Exception) {
+                            Result.Err(RTVIError.ExceptionThrown(e))
+                        }
+                    }
+
                 transport.setState(
-                    if (it.ok) {
+                    if (result.ok) {
                         TransportState.Authorized
                     } else {
                         TransportState.Disconnected
                     }
                 )
+
+                startBotResult.resolve(result)
             }
+
+            startBotResult
         }
 
     /**
@@ -348,8 +367,27 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
      *
      * @return A Future, representing the asynchronous result of this operation.
      */
-    fun disconnect(): Future<Unit, RTVIError> {
-        return transport.disconnect()
+    fun disconnect(): Future<Unit, RTVIError> = thread.runOnThreadReturningFuture {
+        when {
+            pendingStartBot != null -> {
+                transport.setState(TransportState.Disconnected)
+                cancelPendingStartBot()
+                resolvedPromiseOk(thread, Unit)
+            }
+
+            connection == null && transport.state() == TransportState.Authorized -> {
+                transport.setState(TransportState.Disconnected)
+                resolvedPromiseOk(thread, Unit)
+            }
+
+            else -> transport.disconnect()
+        }
+    }
+
+    private fun cancelPendingStartBot() {
+        val pending = pendingStartBot ?: return
+        pendingStartBot = null
+        pending.resolveErr(RTVIError.OperationCancelled)
     }
 
     /**
@@ -560,6 +598,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
      */
     fun release() {
         thread.assertCurrent()
+        cancelPendingStartBot()
         responseWaiters.clearAll()
         transport.release()
     }
