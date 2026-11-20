@@ -37,27 +37,8 @@ class RTVIDocumentTests : ClientTestCase() {
     companion object {
         /** Server messages the client doesn't hand to the app, and why. */
         val ignored = mapOf(
-            "bot-audio-level" to "not handled yet",
-            "bot-interrupted" to "not handled yet",
-            "bot-llm-marker" to "not handled yet",
-            "llm-raw-text" to "not handled yet",
-            "stt-raw-text" to "not handled yet",
-            "system-log" to "not handled yet",
-            "tts-raw-text" to "not handled yet",
             "ui-command" to "it drives the elements of a web page, which Android has no equivalent of yet",
             "ui-job-group" to "it reports jobs that UI commands started, which Android doesn't handle",
-            "user-audio-level" to "not handled yet",
-            "user-input" to "not handled yet",
-            "user-llm-text" to "not handled yet",
-            "user-mute-started" to "not handled yet",
-            "user-mute-stopped" to "not handled yet",
-            "vad-user-started-speaking" to "not handled yet",
-            "vad-user-stopped-speaking" to "not handled yet",
-        )
-
-        /** Server messages that reach the app without all of their data, and why. */
-        val incomplete = mapOf(
-            "error" to "onBackendError() takes only the error's text, without whether it's fatal",
         )
 
         /** Server messages answering a request: they settle it. */
@@ -141,7 +122,7 @@ class RTVIDocumentTests : ClientTestCase() {
                 unexpected += type
             }
         }
-        assertEquals(incomplete.keys.sorted(), unexpected.sorted())
+        assertEquals(emptyList<String>(), unexpected)
     }
 
     @Test

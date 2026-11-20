@@ -3,6 +3,7 @@ package ai.pipecat.client
 import ai.pipecat.client.result.Future
 import ai.pipecat.client.result.Promise
 import ai.pipecat.client.result.RTVIError
+import ai.pipecat.client.result.Result
 import ai.pipecat.client.result.catchExceptions
 import ai.pipecat.client.result.resolvedPromiseErr
 import ai.pipecat.client.result.resolvedPromiseOk
@@ -12,9 +13,13 @@ import ai.pipecat.client.transport.Transport
 import ai.pipecat.client.transport.TransportContext
 import ai.pipecat.client.types.APIRequest
 import ai.pipecat.client.types.AppendToContextResultData
+import ai.pipecat.client.types.AudioLevelData
+import ai.pipecat.client.types.BotDeliveryUpdatedData
+import ai.pipecat.client.types.BotExpressionData
 import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.DataMessage
+import ai.pipecat.client.types.ErrorData
 import ai.pipecat.client.types.LLMContextMessage
 import ai.pipecat.client.types.LLMFunctionCallData
 import ai.pipecat.client.types.LLMFunctionCallHandler
@@ -84,6 +89,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
             responseWaiters.clearAll()
             connection?.ready?.resolveErr(RTVIError.OperationCancelled)
             connection = null
+            setBotDelivery(null)
         }
 
         override fun onMessage(msg: MsgServerToClient) = thread.runOnThread {
@@ -112,6 +118,14 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                         val data =
                             JSON_INSTANCE.decodeFromJsonElement<MsgServerToClient.Data.Error>(msg.data)
                         callbacks.onBackendError(data.error)
+
+                        // An error without `fatal` still reaches onBackendError.
+                        val errorData = catchExceptions {
+                            JSON_INSTANCE.decodeFromJsonElement<ErrorData>(msg.data)
+                        }
+                        if (errorData is Result.Ok) {
+                            callbacks.onBotError(errorData.value)
+                        }
                     }
 
                     MsgServerToClient.Type.ServerResponse,
@@ -167,6 +181,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
                     MsgServerToClient.Type.BotStoppedSpeaking -> {
                         callbacks.onBotStoppedSpeaking()
+                        setBotDelivery(null)
                     }
 
                     MsgServerToClient.Type.BotLlmText -> {
@@ -181,6 +196,55 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                             JSON_INSTANCE.decodeFromJsonElement(msg.data)
 
                         callbacks.onBotOutput(data)
+
+                        BotExpressionData.from(data)?.let { callbacks.onBotExpression(it) }
+
+                        // Only spoken words carry a delivery, as they're spoken.
+                        data.delivery?.let { setBotDelivery(it) }
+                    }
+
+                    MsgServerToClient.Type.BotInterrupted -> callbacks.onBotInterrupted()
+
+                    MsgServerToClient.Type.UserMuteStarted -> callbacks.onUserMuteStarted()
+                    MsgServerToClient.Type.UserMuteStopped -> callbacks.onUserMuteStopped()
+
+                    MsgServerToClient.Type.UserInput -> {
+                        callbacks.onUserInput(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.UserLlmText -> {
+                        callbacks.onUserLLMText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.VadUserStartedSpeaking -> callbacks.onVADUserStartedSpeaking()
+                    MsgServerToClient.Type.VadUserStoppedSpeaking -> callbacks.onVADUserStoppedSpeaking()
+
+                    MsgServerToClient.Type.UserAudioLevel -> {
+                        callbacks.onUserAudioLevel(JSON_INSTANCE.decodeFromJsonElement<AudioLevelData>(msg.data))
+                    }
+
+                    MsgServerToClient.Type.BotAudioLevel -> {
+                        callbacks.onBotAudioLevel(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.SystemLog -> {
+                        callbacks.onSystemLog(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.BotLlmMarker -> {
+                        callbacks.onBotLLMMarker(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.SttRawText -> {
+                        callbacks.onSTTRawText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.LlmRawText -> {
+                        callbacks.onLLMRawText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.TtsRawText -> {
+                        callbacks.onTTSRawText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
                     }
 
                     MsgServerToClient.Type.BotTtsText -> {
@@ -263,6 +327,24 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
     }
 
     private var connection: Connection? = null
+
+    /**
+     * The delivery of the words the bot is speaking, or null when it isn't speaking.
+     */
+    private var botDelivery: List<String>? = null
+
+    /**
+     * Tracks the bot's delivery, reporting each change. A delivery is a set, so the same names in
+     * another order are no change.
+     */
+    private fun setBotDelivery(delivery: List<String>?) {
+        val previous = botDelivery
+        if (delivery?.toSet() == previous?.toSet()) {
+            return
+        }
+        botDelivery = delivery
+        options.callbacks.onBotDeliveryUpdated(BotDeliveryUpdatedData(delivery = delivery, previous = previous))
+    }
 
     /**
      * Runs the handler registered for the function the bot calls, which answers the bot with its
@@ -384,8 +466,9 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
      *
      * @return A Future, representing the asynchronous result of this operation.
      */
-    fun disconnect(): Future<Unit, RTVIError> {
-        return transport.disconnect()
+    fun disconnect(): Future<Unit, RTVIError> = thread.runOnThreadReturningFuture {
+        setBotDelivery(null)
+        transport.disconnect()
     }
 
     /**

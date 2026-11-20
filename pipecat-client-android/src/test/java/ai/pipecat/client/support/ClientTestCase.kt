@@ -50,13 +50,13 @@ abstract class ClientTestCase {
     }
 
     /**
-     * Receives a message of a type, with its data.
+     * Receives a message of a type, with its data if it has any.
      */
-    protected fun receive(type: String, data: JsonElement) {
+    protected fun receive(type: String, data: JsonElement? = null) {
         receive(buildJsonObject {
             put("label", "rtvi-ai")
             put("type", type)
-            put("data", data)
+            data?.let { put("data", it) }
         })
     }
 

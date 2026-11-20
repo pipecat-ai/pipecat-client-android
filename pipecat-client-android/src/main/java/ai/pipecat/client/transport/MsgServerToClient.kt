@@ -43,6 +43,48 @@ data class MsgServerToClient(
         const val BotTtsText = "bot-tts-text"
         const val BotTtsStarted = "bot-tts-started"
         const val BotTtsStopped = "bot-tts-stopped"
+
+        /** The bot was interrupted and stopped what it was saying. */
+        const val BotInterrupted = "bot-interrupted"
+
+        /** The bot stopped listening to the user. */
+        const val UserMuteStarted = "user-mute-started"
+
+        /** The bot listens to the user again. */
+        const val UserMuteStopped = "user-mute-stopped"
+
+        /** What the user said or typed. */
+        const val UserInput = "user-input"
+
+        /** The user's message as the bot's LLM receives it. */
+        const val UserLlmText = "user-llm-text"
+
+        /** Voice activity detection heard the user start speaking. */
+        const val VadUserStartedSpeaking = "vad-user-started-speaking"
+
+        /** Voice activity detection heard the user stop speaking. */
+        const val VadUserStoppedSpeaking = "vad-user-stopped-speaking"
+
+        /** How loud the user's audio is, as the bot measures it. */
+        const val UserAudioLevel = "user-audio-level"
+
+        /** How loud the bot's audio is, as the bot measures it. */
+        const val BotAudioLevel = "bot-audio-level"
+
+        /** A line of the bot's log. */
+        const val SystemLog = "system-log"
+
+        /** The marker the bot's LLM put in a response. */
+        const val BotLlmMarker = "bot-llm-marker"
+
+        /** A transcription as the bot's STT produces it. */
+        const val SttRawText = "stt-raw-text"
+
+        /** Text as the bot's LLM streams it. */
+        const val LlmRawText = "llm-raw-text"
+
+        /** Text the bot's TTS speaks, as it speaks it. */
+        const val TtsRawText = "tts-raw-text"
     }
 
     object Data {

@@ -34,6 +34,13 @@ class TransportStub : Transport<Unit>() {
         ctx.onMessage(JSON_INSTANCE.decodeFromJsonElement(MsgServerToClient.serializer(), message))
     }
 
+    /**
+     * Ends the connection, as transports do when it drops.
+     */
+    fun endConnection() {
+        ctx.onConnectionEnd()
+    }
+
     private fun <V> ok(value: V): Future<V, RTVIError> = resolvedPromiseOk(ctx.thread, value)
 
     override fun initialize(ctx: TransportContext) {
