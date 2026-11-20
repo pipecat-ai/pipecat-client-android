@@ -3,15 +3,6 @@ package ai.pipecat.client.types
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** Protocol 2.0.0: Word-level TTS progress through a spoken segment. */
-@Serializable
-data class BotOutputProgressData(
-    @SerialName("accumulated_text")
-    val accumulatedText: String,
-    @SerialName("remaining_text")
-    val remainingText: String
-)
-
 /**
  * Streaming bot output tokens/chunks.
  *

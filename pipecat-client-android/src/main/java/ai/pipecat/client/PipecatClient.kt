@@ -38,7 +38,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 
-internal const val RTVI_PROTOCOL_VERSION = "2.0.0"
+internal const val RTVI_PROTOCOL_VERSION = "2.3.0"
 
 /**
  * A Pipecat client. Connects to an RTVI backend and handles bidirectional audio and video
