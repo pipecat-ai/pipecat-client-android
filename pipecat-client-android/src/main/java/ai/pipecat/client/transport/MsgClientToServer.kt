@@ -1,14 +1,21 @@
 package ai.pipecat.client.transport
 
+import ai.pipecat.client.types.DTMFInputData
 import ai.pipecat.client.types.DataMessage
+import ai.pipecat.client.types.KeypadEntry
 import ai.pipecat.client.types.LLMContextMessage
 import ai.pipecat.client.types.LLMFunctionCallResult
+import ai.pipecat.client.types.RTVIFile
+import ai.pipecat.client.types.SendFileData
+import ai.pipecat.client.types.SendFileOptions
 import ai.pipecat.client.types.SendTextOptions
 import ai.pipecat.client.utils.JSON_INSTANCE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
 import java.util.UUID
 
@@ -42,6 +49,8 @@ data class MsgClientToServer private constructor(
         const val AppendToContext = "append-to-context"
         const val SendText = "send-text"
         const val LlmFunctionCallResult = "llm-function-call-result"
+        const val SendFile = "send-file"
+        const val Dtmf = "dtmf"
     }
 
     object Data {
@@ -123,6 +132,34 @@ data class MsgClientToServer private constructor(
                 content = content,
                 options = options
             ))
+        )
+
+        fun SendFile(
+            file: RTVIFile,
+            content: String,
+            options: SendFileOptions? = null
+        ) = MsgClientToServer(
+            type = Type.SendFile,
+            data = JSON_INSTANCE.encodeToJsonElement(
+                SendFileData.serializer(),
+                SendFileData(content = content, file = file, options = options)
+            )
+        )
+
+        /**
+         * DTMF keys, for a bot of RTVI 2.1.0 or later.
+         */
+        fun Dtmf(buttons: List<KeypadEntry>) = MsgClientToServer(
+            type = Type.Dtmf,
+            data = JSON_INSTANCE.encodeToJsonElement(DTMFInputData.serializer(), DTMFInputData(buttons = buttons))
+        )
+
+        /**
+         * A DTMF key, for a bot of RTVI 2.0.x, which takes one key a message.
+         */
+        internal fun Dtmf(button: KeypadEntry) = MsgClientToServer(
+            type = Type.Dtmf,
+            data = JsonObject(mapOf("button" to JsonPrimitive(button.value)))
         )
 
         fun DisconnectBot() = MsgClientToServer(
