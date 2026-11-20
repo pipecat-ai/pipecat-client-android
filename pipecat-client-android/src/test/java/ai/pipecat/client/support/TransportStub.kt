@@ -27,6 +27,8 @@ class TransportStub : Transport<Unit>() {
 
     val sent = mutableListOf<MsgClientToServer>()
 
+    override var maxMessageSize = super.maxMessageSize
+
     /**
      * Hands the client a message, as transports do: decoded from its JSON.
      */

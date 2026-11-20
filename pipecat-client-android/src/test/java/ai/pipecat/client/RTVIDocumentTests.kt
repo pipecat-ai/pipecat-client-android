@@ -9,6 +9,8 @@ import ai.pipecat.client.support.same
 import ai.pipecat.client.transport.MsgClientToServer
 import ai.pipecat.client.types.DataMessage
 import ai.pipecat.client.types.LLMFunctionCallHandler
+import ai.pipecat.client.types.RTVIFile
+import ai.pipecat.client.types.SendFileOptions
 import ai.pipecat.client.types.SendTextOptions
 import ai.pipecat.client.types.Value
 import ai.pipecat.client.utils.JSON_INSTANCE
@@ -54,10 +56,8 @@ class RTVIDocumentTests : ClientTestCase() {
 
         /** Client messages the client doesn't send, and why. */
         val notSent = mapOf(
-            "dtmf" to "not supported yet",
             "raw-audio" to "the transport carries the user's audio",
             "raw-audio-batch" to "the transport carries the user's audio",
-            "send-file" to "not supported yet",
             "ui-cancel-job-group" to "Android doesn't handle UI commands",
             "ui-event" to "Android doesn't handle UI commands",
             "ui-snapshot" to "Android doesn't handle UI commands",
@@ -164,6 +164,16 @@ class RTVIDocumentTests : ClientTestCase() {
         )
         client.sendClientMessage("set-volume", Value.Object("level" to Value.Number(5.0)))
         client.sendText("What's the weather?", SendTextOptions(runImmediately = true))
+        client.sendFile(
+            file = RTVIFile(data = "hello".toByteArray(), format = "text/plain", name = "hello.txt"),
+            content = "What does it say?",
+            options = SendFileOptions(runImmediately = true, customOptions = Value.Object("detail" to Value.Str("high")))
+        )
+        client.sendFile(
+            file = RTVIFile(url = "https://example.com/photo.png", format = "image/png"),
+            content = "And this?"
+        )
+        client.sendDTMF("1#")
         receive(buildJsonObject {
             put("label", "rtvi-ai")
             put("type", "llm-function-call")

@@ -3,6 +3,9 @@ package ai.pipecat.client.support
 import ai.pipecat.client.PipecatClient
 import ai.pipecat.client.PipecatClientOptions
 import ai.pipecat.client.RTVI_PROTOCOL_VERSION
+import ai.pipecat.client.result.Future
+import ai.pipecat.client.result.RTVIError
+import ai.pipecat.client.result.Result
 import android.os.Looper
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.buildJsonObject
@@ -28,10 +31,13 @@ abstract class ClientTestCase {
         setUpClient()
     }
 
-    protected fun setUpClient() {
+    protected fun setUpClient(fileUploadEndpoint: String? = null) {
         transport = TransportStub()
         callbacks = RecordingCallbacks()
-        client = PipecatClient(transport, PipecatClientOptions(callbacks = callbacks))
+        client = PipecatClient(
+            transport,
+            PipecatClientOptions(callbacks = callbacks, fileUploadEndpoint = fileUploadEndpoint)
+        )
     }
 
     /**
@@ -39,6 +45,21 @@ abstract class ClientTestCase {
      */
     protected fun idle() {
         shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    /**
+     * Waits for a future's result, running the client's thread meanwhile, such as while an HTTP
+     * request completes on another thread.
+     */
+    protected fun <V> await(future: Future<V, RTVIError>): Result<V, RTVIError> {
+        var result: Result<V, RTVIError>? = null
+        future.withCallback { result = it }
+        val deadline = System.currentTimeMillis() + 5000
+        while (result == null && System.currentTimeMillis() < deadline) {
+            idle()
+            Thread.sleep(5)
+        }
+        return result ?: throw AssertionError("the future didn't complete")
     }
 
     /**
