@@ -33,17 +33,22 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # The generator runs on the Python that ships with macOS.
-      - name: "Install Python"
-        uses: actions/setup-python@v5
+      - name: Run unit tests
+        run: ./gradlew :pipecat-client-android:testDebugUnitTest
+
+  rtvi-protocol:
+    name: "RTVI protocol"
+    runs-on: ubuntu-latest
+    # The generator runs on the Python that ships with macOS.
+    container: python:3.9-slim
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
         with:
-          python-version: '3.9'
+          ref: ${{ github.event.inputs.sdk_git_ref || github.ref }}
 
       - name: Check the generated RTVI protocol types
         run: python scripts/rtvi_protocol.py check
-
-      - name: Run unit tests
-        run: ./gradlew :pipecat-client-android:testDebugUnitTest
 
   sdk:
     name: "SDK"

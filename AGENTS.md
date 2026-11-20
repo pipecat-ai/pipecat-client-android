@@ -24,7 +24,7 @@ python3 scripts/rtvi_protocol.py check      # fails when the generated file is o
 ```
 
 - Gradle needs Java 17.
-- The script runs on macOS's own `/usr/bin/python3` (3.9), with no dependencies: keep it to the standard library and 3.9's syntax. CI runs `check` on Python 3.9.
+- The script runs on macOS's own `/usr/bin/python3` (3.9), with no dependencies: keep it to the standard library and 3.9's syntax. CI runs `check` in a `python:3.9` container.
 - `minSdk` is 24: use `android.util.Base64`, not `java.util.Base64`.
 
 ## Commits, changelog, releases
