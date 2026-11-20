@@ -40,7 +40,6 @@ class RTVIDocumentTests : ClientTestCase() {
             "bot-audio-level" to "not handled yet",
             "bot-interrupted" to "not handled yet",
             "bot-llm-marker" to "not handled yet",
-            "bot-output" to "BotOutputData requires aggregated_by, which the protocol deprecates for output_type",
             "llm-raw-text" to "not handled yet",
             "stt-raw-text" to "not handled yet",
             "system-log" to "not handled yet",
