@@ -149,6 +149,8 @@ class RecordingCallbacks : PipecatEventCallbacks() {
         record("onUserStoppedSpeaking")
     }
 
+    @Deprecated("Records the deprecated callback")
+    @Suppress("DEPRECATION")
     override fun onUserTranscript(data: Transcript) {
         record("onUserTranscript", Transcript.serializer(), data)
     }
@@ -158,6 +160,8 @@ class RecordingCallbacks : PipecatEventCallbacks() {
         record("onBotTranscript", JsonObject(mapOf("text" to JsonPrimitive(text))))
     }
 
+    @Deprecated("Records the deprecated callback")
+    @Suppress("DEPRECATION")
     override fun onBotLLMText(data: MsgServerToClient.Data.BotLLMTextData) {
         record("onBotLLMText", MsgServerToClient.Data.BotLLMTextData.serializer(), data)
     }
@@ -166,6 +170,8 @@ class RecordingCallbacks : PipecatEventCallbacks() {
         record("onBotOutput", BotOutputData.serializer(), data)
     }
 
+    @Deprecated("Records the deprecated callback")
+    @Suppress("DEPRECATION")
     override fun onBotTTSText(data: MsgServerToClient.Data.BotTTSTextData) {
         record("onBotTTSText", MsgServerToClient.Data.BotTTSTextData.serializer(), data)
     }

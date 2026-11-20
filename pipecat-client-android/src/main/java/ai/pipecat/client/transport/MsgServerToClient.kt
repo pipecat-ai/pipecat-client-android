@@ -18,8 +18,11 @@ data class MsgServerToClient(
         const val BotReady = "bot-ready"
         const val Error = "error"
         const val ErrorResponse = "error-response"
+        /** Deprecated: bots send [UserInput] and [SttRawText] instead. */
         const val UserTranscription = "user-transcription"
         const val BotTranscriptionLegacy = "tts-text"
+
+        /** Deprecated: bots send [BotOutput] instead. */
         const val BotTranscription = "bot-transcription"
         const val UserStartedSpeaking = "user-started-speaking"
         const val UserStoppedSpeaking = "user-stopped-speaking"
@@ -36,10 +39,12 @@ data class MsgServerToClient(
         const val LlmFunctionCall = "llm-function-call"
         const val AppendToContextResult = "append-to-context-result"
         const val BotLlmSearchResponse = "bot-llm-search-response"
-        const val BotLlmText = "bot-llm-text" // Streaming chunk/word, directly after LLM
+        /** Deprecated: bots send [LlmRawText] instead. */
+        const val BotLlmText = "bot-llm-text"
         const val BotLlmStarted = "bot-llm-started"
         const val BotLlmStopped = "bot-llm-stopped"
         const val BotOutput = "bot-output"
+        /** Deprecated: bots send [TtsRawText] instead. */
         const val BotTtsText = "bot-tts-text"
         const val BotTtsStarted = "bot-tts-started"
         const val BotTtsStopped = "bot-tts-stopped"
@@ -89,16 +94,21 @@ data class MsgServerToClient(
 
     object Data {
 
+        @Deprecated("Use ErrorData or ErrorResponseData instead. This type will be removed in a future version.")
         @Serializable
         data class Error(
             val error: String
         )
 
+        /** The data of `bot-llm-text`, which only the deprecated [ai.pipecat.client.PipecatEventCallbacks.onBotLLMText] takes. */
+        @Deprecated("Use TextMessageData instead. This type will be removed in a future version.")
         @Serializable
         data class BotLLMTextData(
             val text: String
         )
 
+        /** The data of `bot-tts-text`, which only the deprecated [ai.pipecat.client.PipecatEventCallbacks.onBotTTSText] takes. */
+        @Deprecated("Use TextMessageData instead. This type will be removed in a future version.")
         @Serializable
         data class BotTTSTextData(
             val text: String

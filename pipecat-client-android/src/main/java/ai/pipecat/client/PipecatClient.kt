@@ -20,6 +20,7 @@ import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.DataMessage
 import ai.pipecat.client.types.ErrorData
+import ai.pipecat.client.types.ErrorResponseData
 import ai.pipecat.client.types.LLMContextMessage
 import ai.pipecat.client.types.LLMFunctionCallData
 import ai.pipecat.client.types.LLMFunctionCallHandler
@@ -126,7 +127,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
                     MsgServerToClient.Type.Error -> {
                         val data =
-                            JSON_INSTANCE.decodeFromJsonElement<MsgServerToClient.Data.Error>(msg.data)
+                            JSON_INSTANCE.decodeFromJsonElement<ErrorResponseData>(msg.data)
                         callbacks.onBackendError(data.error)
 
                         // An error without `fatal` still reaches onBackendError.
@@ -151,9 +152,7 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     MsgServerToClient.Type.ErrorResponse -> {
 
                         val data =
-                            JSON_INSTANCE.decodeFromJsonElement<MsgServerToClient.Data.Error>(
-                                msg.data
-                            )
+                            JSON_INSTANCE.decodeFromJsonElement<ErrorResponseData>(msg.data)
 
                         try {
                             responseWaiters.reject(
@@ -168,12 +167,14 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
 
                     MsgServerToClient.Type.UserTranscription -> {
                         val data = JSON_INSTANCE.decodeFromJsonElement<Transcript>(msg.data)
+                        @Suppress("DEPRECATION")
                         callbacks.onUserTranscript(data)
                     }
 
                     MsgServerToClient.Type.BotTranscription,
                     MsgServerToClient.Type.BotTranscriptionLegacy -> {
                         val text = (msg.data.jsonObject.get("text") as JsonPrimitive).content
+                        @Suppress("DEPRECATION")
                         callbacks.onBotTranscript(text)
                     }
 
@@ -195,10 +196,8 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     }
 
                     MsgServerToClient.Type.BotLlmText -> {
-                        val data: MsgServerToClient.Data.BotLLMTextData =
-                            JSON_INSTANCE.decodeFromJsonElement(msg.data)
-
-                        callbacks.onBotLLMText(data)
+                        @Suppress("DEPRECATION")
+                        callbacks.onBotLLMText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
                     }
 
                     MsgServerToClient.Type.BotOutput -> {
@@ -258,10 +257,8 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     }
 
                     MsgServerToClient.Type.BotTtsText -> {
-                        val data: MsgServerToClient.Data.BotTTSTextData =
-                            JSON_INSTANCE.decodeFromJsonElement(msg.data)
-
-                        callbacks.onBotTTSText(data)
+                        @Suppress("DEPRECATION")
+                        callbacks.onBotTTSText(JSON_INSTANCE.decodeFromJsonElement(msg.data))
                     }
 
                     MsgServerToClient.Type.BotLlmStarted -> callbacks.onBotLLMStarted()
