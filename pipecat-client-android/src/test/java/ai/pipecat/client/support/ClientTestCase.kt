@@ -49,6 +49,17 @@ abstract class ClientTestCase {
         idle()
     }
 
+    /**
+     * Receives a message of a type, with its data.
+     */
+    protected fun receive(type: String, data: JsonElement) {
+        receive(buildJsonObject {
+            put("label", "rtvi-ai")
+            put("type", type)
+            put("data", data)
+        })
+    }
+
     protected fun becomeReady(version: String = RTVI_PROTOCOL_VERSION) {
         receive(buildJsonObject {
             put("label", "rtvi-ai")

@@ -6,6 +6,9 @@ import ai.pipecat.client.types.BotLLMSearchResponseData
 import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.LLMFunctionCallData
+import ai.pipecat.client.types.LLMFunctionCallInProgressData
+import ai.pipecat.client.types.LLMFunctionCallStartedData
+import ai.pipecat.client.types.LLMFunctionCallStoppedData
 import ai.pipecat.client.types.PipecatMetrics
 import ai.pipecat.client.types.Transcript
 import ai.pipecat.client.types.Value
@@ -105,6 +108,19 @@ class RecordingCallbacks : PipecatEventCallbacks() {
         record("onBotLLMSearchResponse", BotLLMSearchResponseData.serializer(), data)
     }
 
+    override fun onLLMFunctionCallStarted(data: LLMFunctionCallStartedData) {
+        record("onLLMFunctionCallStarted", LLMFunctionCallStartedData.serializer(), data)
+    }
+
+    override fun onLLMFunctionCallInProgress(data: LLMFunctionCallInProgressData) {
+        record("onLLMFunctionCallInProgress", LLMFunctionCallInProgressData.serializer(), data)
+    }
+
+    override fun onLLMFunctionCallStopped(data: LLMFunctionCallStoppedData) {
+        record("onLLMFunctionCallStopped", LLMFunctionCallStoppedData.serializer(), data)
+    }
+
+    @Deprecated("Records the deprecated callback")
     override fun onLLMFunctionCall(functionCallData: LLMFunctionCallData) {
         record("onLLMFunctionCall", LLMFunctionCallData.serializer(), functionCallData)
     }

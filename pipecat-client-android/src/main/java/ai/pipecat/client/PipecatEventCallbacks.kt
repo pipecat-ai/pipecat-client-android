@@ -5,6 +5,9 @@ import ai.pipecat.client.types.BotLLMSearchResponseData
 import ai.pipecat.client.types.BotOutputData
 import ai.pipecat.client.types.BotReadyData
 import ai.pipecat.client.types.LLMFunctionCallData
+import ai.pipecat.client.types.LLMFunctionCallInProgressData
+import ai.pipecat.client.types.LLMFunctionCallStartedData
+import ai.pipecat.client.types.LLMFunctionCallStoppedData
 import ai.pipecat.client.types.MediaDeviceInfo
 import ai.pipecat.client.types.Participant
 import ai.pipecat.client.types.PipecatMetrics
@@ -176,10 +179,30 @@ abstract class PipecatEventCallbacks {
     open fun onBotLLMSearchResponse(data: BotLLMSearchResponseData) {}
 
     /**
+     * Invoked when the LLM starts calling a function. It carries the function's name when the bot
+     * reports it.
+     */
+    open fun onLLMFunctionCallStarted(data: LLMFunctionCallStartedData) {}
+
+    /**
+     * Invoked when the LLM is calling a function. How much it carries depends on the bot's report
+     * level for the function: only the call's id, or also the function's name and arguments.
+     *
+     * To run the function in the app and answer the bot with its result, register a handler with
+     * [PipecatClient.registerFunctionCallHandler].
+     */
+    open fun onLLMFunctionCallInProgress(data: LLMFunctionCallInProgressData) {}
+
+    /**
+     * Invoked when a function call finishes, or is cancelled.
+     */
+    open fun onLLMFunctionCallStopped(data: LLMFunctionCallStoppedData) {}
+
+    /**
      * Invoked when the bot makes a function call request to the client.
      *
-     * To respond to function calls, register a handler using
-     * registerFunctionCallHandler().
+     * Only bots that send the deprecated `llm-function-call` message invoke it.
      */
+    @Deprecated("Use registerFunctionCallHandler() or onLLMFunctionCallInProgress() instead. This callback will be removed in a future version.")
     open fun onLLMFunctionCall(functionCallData: LLMFunctionCallData) {}
 }

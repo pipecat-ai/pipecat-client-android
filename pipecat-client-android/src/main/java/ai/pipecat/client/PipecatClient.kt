@@ -18,6 +18,7 @@ import ai.pipecat.client.types.DataMessage
 import ai.pipecat.client.types.LLMContextMessage
 import ai.pipecat.client.types.LLMFunctionCallData
 import ai.pipecat.client.types.LLMFunctionCallHandler
+import ai.pipecat.client.types.LLMFunctionCallInProgressData
 import ai.pipecat.client.types.LLMFunctionCallResult
 import ai.pipecat.client.types.MediaDeviceId
 import ai.pipecat.client.types.SendTextOptions
@@ -30,6 +31,7 @@ import ai.pipecat.client.utils.ThreadRef
 import ai.pipecat.client.utils.post
 import android.util.Log
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -202,39 +204,44 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                         callbacks.onMetrics(JSON_INSTANCE.decodeFromJsonElement(msg.data))
                     }
 
+                    MsgServerToClient.Type.LlmFunctionCallStarted -> {
+                        callbacks.onLLMFunctionCallStarted(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
+                    MsgServerToClient.Type.LlmFunctionCallInProgress -> {
+
+                        val data =
+                            JSON_INSTANCE.decodeFromJsonElement<LLMFunctionCallInProgressData>(msg.data)
+
+                        // A handler can only run when the bot reports which function it calls.
+                        if (data.functionName != null) {
+                            runFunctionCallHandler(
+                                msgId = msg.id,
+                                functionCallData = LLMFunctionCallData(
+                                    functionName = data.functionName,
+                                    toolCallID = data.toolCallID,
+                                    args = data.arguments?.let { JSON_INSTANCE.encodeToJsonElement(it) }
+                                        ?: JsonObject(emptyMap())
+                                )
+                            )
+                        }
+
+                        callbacks.onLLMFunctionCallInProgress(data)
+                    }
+
+                    MsgServerToClient.Type.LlmFunctionCallStopped -> {
+                        callbacks.onLLMFunctionCallStopped(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                    }
+
                     MsgServerToClient.Type.LlmFunctionCall -> {
 
                         val functionCallData =
                             JSON_INSTANCE.decodeFromJsonElement<LLMFunctionCallData>(msg.data)
 
+                        @Suppress("DEPRECATION")
                         callbacks.onLLMFunctionCall(functionCallData)
 
-                        val handler = functionCallHandlers[functionCallData.functionName]
-
-                        if (handler != null) {
-                            val activeConnection = connection
-
-                            handler.handleFunctionCall(functionCallData) { resultData ->
-
-                                thread.runOnThread {
-                                    if (activeConnection == connection) {
-                                        sendMessage(
-                                            MsgClientToServer.LlmFunctionCallResult(
-                                                msgId = msg.id ?: UUID.randomUUID().toString(),
-                                                data = LLMFunctionCallResult(
-                                                    functionName = functionCallData.functionName,
-                                                    toolCallID = functionCallData.toolCallID,
-                                                    arguments = functionCallData.args,
-                                                    result = JSON_INSTANCE.encodeToJsonElement<Value>(
-                                                        resultData
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        runFunctionCallHandler(msgId = msg.id, functionCallData = functionCallData)
                     }
 
                     MsgServerToClient.Type.BotLlmSearchResponse -> {
@@ -256,6 +263,35 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
     }
 
     private var connection: Connection? = null
+
+    /**
+     * Runs the handler registered for the function the bot calls, which answers the bot with its
+     * result.
+     */
+    private fun runFunctionCallHandler(msgId: String?, functionCallData: LLMFunctionCallData) {
+
+        val handler = functionCallHandlers[functionCallData.functionName] ?: return
+        val activeConnection = connection
+
+        handler.handleFunctionCall(functionCallData) { resultData ->
+
+            thread.runOnThread {
+                if (activeConnection == connection) {
+                    sendMessage(
+                        MsgClientToServer.LlmFunctionCallResult(
+                            msgId = msgId ?: UUID.randomUUID().toString(),
+                            data = LLMFunctionCallResult(
+                                functionName = functionCallData.functionName,
+                                toolCallID = functionCallData.toolCallID,
+                                arguments = functionCallData.args,
+                                result = JSON_INSTANCE.encodeToJsonElement<Value>(resultData)
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     init {
         transport.initialize(transportCtx)
@@ -443,8 +479,11 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
     /**
      * Registers a function call handler for a specific function name.
      *
-     * When the bot calls a function with the specified name, the registered callback
-     * will be invoked instead of the delegate's `onLLMFunctionCall` method.
+     * When the bot calls a function with the specified name, the callback runs with the call's
+     * arguments, and the result it's given is sent back to the bot. The bot reports a call's
+     * function name and arguments only when its report level for the function allows it: in
+     * Pipecat, at least `RTVIFunctionCallReportLevel.ARGUMENTS` in
+     * `RTVIObserverParams.function_call_report_level`.
      */
     fun registerFunctionCallHandler(
         functionName: String,

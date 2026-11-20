@@ -28,6 +28,11 @@ data class MsgServerToClient(
         const val ServerMessage = "server-message"
         const val ServerResponse = "server-response"
         const val Metrics = "metrics"
+        const val LlmFunctionCallStarted = "llm-function-call-started"
+        const val LlmFunctionCallInProgress = "llm-function-call-in-progress"
+        const val LlmFunctionCallStopped = "llm-function-call-stopped"
+
+        /** Deprecated: bots send [LlmFunctionCallInProgress] instead. */
         const val LlmFunctionCall = "llm-function-call"
         const val AppendToContextResult = "append-to-context-result"
         const val BotLlmSearchResponse = "bot-llm-search-response"

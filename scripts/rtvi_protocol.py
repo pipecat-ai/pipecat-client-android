@@ -62,6 +62,7 @@ SKIPPED_MESSAGES = {
 HAND_WRITTEN = {
     "BotOutputMessageData": "BotOutputData",
     "LLMFunctionCallMessageData": "LLMFunctionCallData",
+    "LLMFunctionCallResultData": "LLMFunctionCallResult",
     "RawServerResponseData": "DataMessage",
     "SendTextOptions": "SendTextOptions",
     "UserTranscriptionMessageData": "Transcript",

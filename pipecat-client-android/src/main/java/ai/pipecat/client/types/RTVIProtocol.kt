@@ -238,21 +238,6 @@ data class LLMFunctionCallInProgressData(
     val arguments: Value? = null,
 )
 
-/** Data for LLM function call result. */
-@Serializable
-internal data class LLMFunctionCallResultData(
-    /** Name of the function called. */
-    @SerialName("function_name")
-    val functionName: String,
-    /** Unique identifier of the call, as the server reported it. */
-    @SerialName("tool_call_id")
-    val toolCallID: String,
-    /** Arguments the function was called with. */
-    val arguments: Value,
-    /** What the function returned. */
-    val result: Value,
-)
-
 /** Data for LLM function call start notification. */
 @Serializable
 data class LLMFunctionCallStartedData(
