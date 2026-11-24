@@ -93,12 +93,12 @@ class RecordingCallbacks : PipecatEventCallbacks() {
         record("onVADUserStoppedSpeaking")
     }
 
-    override fun onUserAudioLevel(data: AudioLevelData) {
-        record("onUserAudioLevel", AudioLevelData.serializer(), data)
+    override fun onServerUserAudioLevel(data: AudioLevelData) {
+        record("onServerUserAudioLevel", AudioLevelData.serializer(), data)
     }
 
-    override fun onBotAudioLevel(data: AudioLevelData) {
-        record("onBotAudioLevel", AudioLevelData.serializer(), data)
+    override fun onServerBotAudioLevel(data: AudioLevelData) {
+        record("onServerBotAudioLevel", AudioLevelData.serializer(), data)
     }
 
     override fun onSystemLog(data: SystemLog) {

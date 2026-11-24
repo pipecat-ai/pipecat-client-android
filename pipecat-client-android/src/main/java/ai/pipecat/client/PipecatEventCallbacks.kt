@@ -95,28 +95,40 @@ abstract class PipecatEventCallbacks {
     open fun onAvailableMicsUpdated(mics: List<MediaDeviceInfo>) {}
 
     /**
-     * Invoked regularly with the volume of the locally captured audio, as the transport measures
-     * it.
-     *
-     * Its default calls the deprecated [onUserAudioLevel] taking a `Float`, so an app overriding
-     * that one still hears the level.
+     * Invoked regularly with how loud the user's microphone audio is, from 0 (quiet) to 1 (loud),
+     * as the transport measures it on the device.
      */
-    @Suppress("DEPRECATION")
-    open fun onLocalAudioLevel(level: Float) = onUserAudioLevel(level)
+    open fun onClientUserAudioLevel(level: Float) {}
+
+    /**
+     * Invoked regularly with how loud the bot's audio is, from 0 (quiet) to 1 (loud), as the
+     * transport measures it on the device while playing it.
+     */
+    open fun onClientBotAudioLevel(level: Float) {}
 
     /**
      * Invoked regularly with the volume of the locally captured audio.
+     *
+     * Transports report the level they measure here. Its default calls [onClientUserAudioLevel].
      */
     @Deprecated(
-        "Use onLocalAudioLevel instead. This callback will be removed in a future version.",
-        ReplaceWith("onLocalAudioLevel(level)")
+        "Use onClientUserAudioLevel instead. This callback will be removed in a future version.",
+        ReplaceWith("onClientUserAudioLevel(level)")
     )
-    open fun onUserAudioLevel(level: Float) {}
+    open fun onUserAudioLevel(level: Float) = onClientUserAudioLevel(level)
 
     /**
      * Invoked regularly with the audio volume of each remote participant.
+     *
+     * Transports report the level they measure here, and the bot is the remote participant they
+     * play. Its default calls [onClientBotAudioLevel].
      */
-    open fun onRemoteAudioLevel(level: Float, participant: Participant) {}
+    @Deprecated(
+        "Use onClientBotAudioLevel instead. This callback will be removed in a future version.",
+        ReplaceWith("onClientBotAudioLevel(level)")
+    )
+    open fun onRemoteAudioLevel(level: Float, participant: Participant) =
+        onClientBotAudioLevel(level)
 
     /**
      * Invoked when the bot starts talking.
@@ -234,17 +246,19 @@ abstract class PipecatEventCallbacks {
 
     /**
      * Invoked regularly with how loud the user's audio is, from 0 (quiet) to 1 (loud), as the bot
-     * received it. Unlike [onLocalAudioLevel], which the transport measures, the bot measures it.
-     * The bot sends it only when enabled, with Pipecat's `user_audio_level_enabled` setting.
+     * received it. Unlike [onClientUserAudioLevel], which the transport measures on the device,
+     * the bot measures it. The bot sends it only when enabled, with Pipecat's
+     * `user_audio_level_enabled` setting.
      */
-    open fun onUserAudioLevel(data: AudioLevelData) {}
+    open fun onServerUserAudioLevel(data: AudioLevelData) {}
 
     /**
      * Invoked regularly with how loud the bot's audio is, from 0 (quiet) to 1 (loud), as the bot
-     * produced it. Unlike [onRemoteAudioLevel], which the transport measures, the bot measures
-     * it. The bot sends it only when enabled, with Pipecat's `bot_audio_level_enabled` setting.
+     * produced it. Unlike [onClientBotAudioLevel], which the transport measures on the device, the
+     * bot measures it. The bot sends it only when enabled, with Pipecat's
+     * `bot_audio_level_enabled` setting.
      */
-    open fun onBotAudioLevel(data: AudioLevelData) {}
+    open fun onServerBotAudioLevel(data: AudioLevelData) {}
 
     /**
      * Invoked with a line of the bot's log, for debugging. The bot sends it only when enabled,

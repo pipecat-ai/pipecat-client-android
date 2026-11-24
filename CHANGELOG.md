@@ -5,13 +5,13 @@
 - Added support for RTVI protocol 2.3.0: the client reports `"2.3.0"` in `client-ready`. The protocol's types are generated from Pipecat's AsyncAPI document of the protocol, vendored in `spec/`, by `scripts/rtvi_protocol.py`.
 - `BotOutputData` has `willBeSpoken`, `spokenStatus`, `spokenProgress` and `segmentId`, enabling word-level TTS progress tracking; `outputType`, which bots older than 2.3.0 fill in through `aggregated_by`; and `delivery`.
 - Function calls the bot reports with `llm-function-call-in-progress` now run the handler registered with `registerFunctionCallHandler()`, which answers the bot with its result. New callbacks `onLLMFunctionCallStarted`, `onLLMFunctionCallInProgress` and `onLLMFunctionCallStopped` report a call's lifecycle.
-- New callbacks for the rest of the bot's messages: `onBotInterrupted`, `onUserMuteStarted`, `onUserMuteStopped`, `onUserInput`, `onUserLLMText`, `onVADUserStartedSpeaking`, `onVADUserStoppedSpeaking`, `onUserAudioLevel(data: AudioLevelData)`, `onBotAudioLevel`, `onSystemLog`, `onBotLLMMarker`, `onSTTRawText`, `onLLMRawText` and `onTTSRawText`, each with an empty default implementation.
+- New callbacks for the rest of the bot's messages: `onBotInterrupted`, `onUserMuteStarted`, `onUserMuteStopped`, `onUserInput`, `onUserLLMText`, `onVADUserStartedSpeaking`, `onVADUserStoppedSpeaking`, `onServerUserAudioLevel`, `onServerBotAudioLevel`, `onSystemLog`, `onBotLLMMarker`, `onSTTRawText`, `onLLMRawText` and `onTTSRawText`, each with an empty default implementation.
 - `onBotError` reports an error the bot sends with whether it's fatal, after `onBackendError`.
 - Expressive conversation (alpha): `onBotExpression` reports a sound, such as a laugh, or a pause the bot performed, and `onBotDeliveryUpdated` reports when the bot's delivery, such as `["warm"]`, changes. Both are derived from `bot-output`.
 - `BotReadyData` has `capabilities`, what the bot does in the session (RTVI 2.2.0+), and `PipecatMetrics` exposes all of its metrics: `processing`, `ttfb`, `ttfa`, `ttfat`, `tokens`, `sttUsage` and `characters`.
 - Added `sendFile()`, which sends the bot's LLM a file with text that goes with it (RTVI 2.2.0+). Build the file with `RTVIFile(data, format, name)` or `RTVIFile(url, format, name)`. A file too large for the transport to send in a message is uploaded first, to the `fileUploadUrl` the start-bot response advertises or else the new `PipecatClientOptions.fileUploadEndpoint`, and sent by its URL. Transports report how large a message they send with the new `Transport.maxMessageSize`, 64 KiB by default.
 - Added `sendDTMF()`, which sends DTMF keypresses such as `"123#"` (RTVI 2.0.0+).
-- Added `onLocalAudioLevel`, the level of the locally captured audio, which the transport measures. Its default implementation calls the deprecated `onUserAudioLevel(level: Float)`.
+- `onClientUserAudioLevel` and `onClientBotAudioLevel` report how loud the user's and the bot's audio are, as the transport measures them on the device. Their names set them apart from `onServerUserAudioLevel` and `onServerBotAudioLevel`, which report the levels the bot measures.
 - The client now logs a warning when the bot is running an older RTVI protocol version than the client.
 
 ### Changed
@@ -28,7 +28,7 @@
 - `onBotTTSText` is deprecated: use `onBotOutput` to show the bot's text, or `onTTSRawText` to inspect what the TTS produced. `MsgServerToClient.Data.BotTTSTextData`, which only it takes, is deprecated in favour of `TextMessageData`.
 - `onBotTranscript` is deprecated: use `onBotOutput`.
 - `onLLMFunctionCall` is deprecated: use `registerFunctionCallHandler()` to answer a function call, or `onLLMFunctionCallInProgress` to follow it. Only bots that send the deprecated `llm-function-call` invoke it.
-- `onUserAudioLevel(level: Float)` is deprecated in favour of `onLocalAudioLevel`. Transports call `onLocalAudioLevel` once they're updated to this version.
+- `onUserAudioLevel(level: Float)` and `onRemoteAudioLevel` are deprecated: use `onClientUserAudioLevel` and `onClientBotAudioLevel` instead. Transports still report levels through them, and their default implementations call the new callbacks.
 - `BotOutputData.aggregatedBy` is deprecated in favour of `outputType`, and the constructor taking `aggregatedBy` in favour of the one taking `outputType`. `BotOutputData.spoken` is deprecated in favour of `willBeSpoken`.
 - `MsgServerToClient.Data.Error` is deprecated in favour of `ErrorData` and `ErrorResponseData`.
 

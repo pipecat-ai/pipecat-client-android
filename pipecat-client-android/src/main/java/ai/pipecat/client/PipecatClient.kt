@@ -229,11 +229,11 @@ open class PipecatClient<TransportType : Transport<ConnectParams>, ConnectParams
                     MsgServerToClient.Type.VadUserStoppedSpeaking -> callbacks.onVADUserStoppedSpeaking()
 
                     MsgServerToClient.Type.UserAudioLevel -> {
-                        callbacks.onUserAudioLevel(JSON_INSTANCE.decodeFromJsonElement<AudioLevelData>(msg.data))
+                        callbacks.onServerUserAudioLevel(JSON_INSTANCE.decodeFromJsonElement<AudioLevelData>(msg.data))
                     }
 
                     MsgServerToClient.Type.BotAudioLevel -> {
-                        callbacks.onBotAudioLevel(JSON_INSTANCE.decodeFromJsonElement(msg.data))
+                        callbacks.onServerBotAudioLevel(JSON_INSTANCE.decodeFromJsonElement(msg.data))
                     }
 
                     MsgServerToClient.Type.SystemLog -> {
