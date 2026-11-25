@@ -48,4 +48,11 @@ abstract class Transport<ConnectParams> {
     abstract fun setState(state: TransportState)
 
     abstract fun tracks(): Tracks
+
+    /**
+     * The largest message, in bytes, the transport sends to the bot. [ai.pipecat.client.PipecatClient.sendFile]
+     * uploads a file whose message is larger.
+     */
+    open val maxMessageSize: Int
+        get() = 64 * 1024
 }

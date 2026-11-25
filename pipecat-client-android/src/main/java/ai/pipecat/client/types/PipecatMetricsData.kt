@@ -1,12 +1,6 @@
 package ai.pipecat.client.types
 
-import kotlinx.serialization.Serializable
-
 /**
- * Metrics data received from a Pipecat instance.
+ * One service's measure in a metrics message.
  */
-@Serializable
-data class PipecatMetricsData(
-    val processor: String,
-    val value: Double
-)
+typealias PipecatMetricsData = ProcessingMetricsData

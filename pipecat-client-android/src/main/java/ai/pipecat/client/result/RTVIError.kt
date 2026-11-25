@@ -78,6 +78,16 @@ abstract class RTVIError {
     }
 
     /**
+     * The bot doesn't support the operation, because it speaks an older RTVI protocol.
+     */
+    data class UnsupportedFeature(
+        val feature: String,
+        val requirement: String
+    ) : RTVIError() {
+        override val description = "The bot doesn't support $feature: it $requirement"
+    }
+
+    /**
      * The previous connection is still active.
      */
     data object PreviousConnectionStillActive : RTVIError() {

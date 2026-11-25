@@ -18,6 +18,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tests:
+    name: "Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sdk_git_ref || github.ref }}
+
+      - name: "Install Java"
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run unit tests
+        run: ./gradlew :pipecat-client-android:testDebugUnitTest
+
+  rtvi-protocol:
+    name: "RTVI protocol"
+    runs-on: ubuntu-latest
+    # The generator runs on the Python that ships with macOS.
+    container: python:3.9-slim
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.sdk_git_ref || github.ref }}
+
+      - name: Check the generated RTVI protocol types
+        run: python scripts/rtvi_protocol.py check
+
   sdk:
     name: "SDK"
     runs-on: ubuntu-latest
